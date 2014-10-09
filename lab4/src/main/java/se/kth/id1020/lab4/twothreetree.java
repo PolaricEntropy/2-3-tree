@@ -12,7 +12,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		
 		public void Relink(Node oldNode)
 		{
-			if (parent instanceof TwoNode)
+			if (parent instanceof twothreetree.TwoNode)
 			{
 				if (parent.left == oldNode)
 					parent.left = this;
@@ -65,26 +65,29 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 	public void put(K key, ValuePair<Value1, Value2> value)
 	{
-		//If we don't have a root node, create one and store our stuff in it.
+		//If we don't have a root node we don't have a tree.
+		//Create a TwoNode and store our key/value in it, done.
 		if (root == null)
 		{
-			KeyValuePair test = new KeyValuePair<K, Value1, Value2>(key, value);
-			root = new TwoNode(test);
+			//Size of 1 since we just have one node.
+			root = new TwoNode(new KeyValuePair<K, Value1, Value2>(key, value), 1);
 			return;
 		}
 		
+		//Find the node we should add stuff to.
 		Node existingNode = getNode(key);
 		
+		//If not found ABORT!!!!!!!
 		if (existingNode == null)
 			return;
 		
 		
-		if (existingNode instanceof TwoNode)
+		if (existingNode instanceof twothreetree.TwoNode)
 		{
 			if (key > existingNode.keyvalues1.key)
 			{
 				//Store our new stuff to the right.
-				ThreeNode newNode = new ThreeNode(existingNode.keyvalues1, new KeyValuePair(key, values));
+				ThreeNode newNode = new ThreeNode(existingNode.keyvalues1, new KeyValuePair<K, Value1, Value2>(key, value));
 	
 				Node parent = existingNode.parent;
 				newNode.parent = parent;
@@ -103,7 +106,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			else // Lesser than...
 			{
 				//Store our new stuff to the left.
-				ThreeNode newNode = new ThreeNode(new KeyValuePair(key, values), existingNode.keyvalues1);
+				ThreeNode newNode = new ThreeNode(new KeyValuePair<K, Value1, Value2>(key, value), existingNode.keyvalues1);
 
 				Node parent = existingNode.parent;
 				newNode.parent = parent;
@@ -115,19 +118,45 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			}
 			
 		}
-		else if (existingNode instanceof ThreeNode)
+		else if (existingNode instanceof twothreetree.ThreeNode)
 		{
 			ThreeNode existingThreeNode = (ThreeNode) existingNode;
 		
-			KeyValuePair tmp;
-			
-			if (key > existingThreeNode.keyvalues1.key)
+			KeyValuePair<K, Value1, Value2> rightMostValue;
+
+			if (existingThreeNode.keyvalues1.key.equals(key))
 			{
-				tmp = new KeyValuePair(key, value);
+				existingThreeNode.keyvalues1.value = value;
+				return;
+			}
+			if (existingThreeNode.keyvalues2.key.equals(key))
+			{
+				existingThreeNode.keyvalues2.value = value;
+				return;
 			}
 			
 			
-			putInNode(existingNode, key, value);
+			//Key is less than left key, insert new value to the left. 
+			if (key < existingThreeNode.keyvalues1.key)
+			{
+				rightMostValue = existingThreeNode.keyvalues2;
+				existingThreeNode.keyvalues2 = existingThreeNode.keyvalues1;
+				existingThreeNode.keyvalues1 = new KeyValuePair<K, Value1, Value2>(key, value); 
+			}
+			//Key is larger then the left key, and smaller then the right key, thus it should go in the middle.
+			if (key > existingThreeNode.keyvalues1.key && key < existingThreeNode.keyvalues2.key)
+			{
+				rightMostValue = existingThreeNode.keyvalues2;
+				existingThreeNode.keyvalues2 = new KeyValuePair<K, Value1, Value2>(key, value);
+			}
+			//Key is more then the right key, insert new value in the right.
+			if (key > existingThreeNode.keyvalues2.key)
+			{
+				rightMostValue = new KeyValuePair<K, Value1, Value2>(key, value);
+			}
+			
+			
+			putInNode(existingNode, rightMostValue);
 		}
 		
 	}
@@ -167,10 +196,80 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		throw new UnsupportedOperationException();
 	}
 	
-	private void putInNode(Node existingNode, K key, ValuePair<Value1, Value2> values)
+	private void putInNode(ThreeNode existingNode, KeyValuePair<K, Value1, Value2> rightMostKey)
 	{
 	
+		Node parent = existingNode.parent;
 		
+		//If we have managed to climb to the top of our mountain.
+		if (parent == root)
+		{
+			if (key < parent.keyvalues1)
+			{
+				root = new TwoNode(parent.keyvalues1);
+				root.left = new TwoNode (key, values);
+				root.right = new TwoNode(parent.keyvalues2);
+			}
+			else if (key > parent.keyvalues1 && key < parent.keyvalues2)
+			{
+				root = new TwoNode(key, values);
+			}
+			else if (key > parent.keyvalues2)
+			{
+				root = new TwoNode(parent.keyvalues2);
+			}
+			
+			return;
+		}
+		
+		
+		if(parent instanceof twothreetree.TwoNode)
+		{
+			if (existingNode.keyvalues2 < parent.keyvalues1)
+			{
+				ThreeNode newNode = new ThreeNode(existingNode.keyvalues2, parent.keyvalues1);
+				newNode.parent = parent.parent;
+				
+				newNode.Relink(parent);
+				
+				
+				TwoNode newLeft = new TwoNode (existingNode.keyvalues1);
+				newLeft.parent = parent;
+				
+				newNode.left = newLeft;
+				
+				TwoNode newMiddle = new TwoNode (rightMostKey);
+				newMiddle.parent = parent;
+				
+				newNode.middle = newMiddle;
+				
+				newNode.right = existingNode.right;
+			}
+			else if(existingNode.keyvalues2 > parent.keyvalues1)
+			{
+				ThreeNode newNode = new ThreeNode(parent.keyvalues1, existingNode.keyvalues2);
+				newNode.parent = parent.parent;
+				
+				newNode.Relink(parent);
+				
+				newNode.left = existingNode.left;
+				
+				TwoNode newMiddle = new TwoNode (existingNode.keyvalues1));
+				newMiddle.parent = parent;
+				
+				newNode.middle = newMiddle;
+				
+				TwoNode newRight = new TwoNode (rightMostKey);
+				newRight.parent = parent;
+				
+				newNode.right = newRight;
+			}
+			
+		}
+		else if(parent instanceof twothreetree.ThreeNode)
+		{
+			
+		}
 		
 		
 	}
