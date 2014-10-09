@@ -6,7 +6,7 @@ import java.net.URL;
 public class Driver {
 
 	public static void main(String[] args) {
-		twothreetree<String, Integer> tree = new twothreetree<String, Integer>();
+		twothreetree<String, Integer, Integer> tree = new twothreetree<String, Integer, Integer>();
 		
 		URL url = Driver.class.getResource("kap1.txt");
 		In input = new In(url);

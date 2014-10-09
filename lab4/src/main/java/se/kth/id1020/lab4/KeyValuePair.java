@@ -1,6 +1,6 @@
 package se.kth.id1020.lab4;
 
-public class KeyValuePair<K, Value1, Value2> {
+public class KeyValuePair<K extends Comparable<K>, Value1, Value2> {
 
 	public K key;
 	public ValuePair<Value1, Value2> value;
