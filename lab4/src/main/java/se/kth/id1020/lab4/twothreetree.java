@@ -19,9 +19,8 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		
 		public Node(KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2, int N)
 		{
-			this.keyvalues1 = keyValues1;
+			this(keyValues1, N);
 			this.keyvalues2 = keyValues2;
-			this.N = N;
 		}	
 	}
 	public class FourNode extends Node
@@ -29,9 +28,10 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		protected KeyValuePair<K, Value1, Value2> keyvalues3;
 		protected Node middle2;
 		
-		public FourNode ()
+		public FourNode (KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2, KeyValuePair<K, Value1, Value2> keyValues3, int N)
 		{
-			
+			super(keyValues1, keyValues2, N);
+			this.keyvalues3 = keyValues3;
 		}
 	}
 	
@@ -76,7 +76,6 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		}
 		else //If the node is a ThreeNode, then it's more complicated. Create a temporary 4-node, split it and merge the parent back into the tree.
 		{		
-			KeyValuePair<K, Value1, Value2> rightMostValue = null;
 
 			//If we have any key with the key we are trying to add, then just replace those values.  
 			if (foundNode.keyvalues1.key.equals(key))
@@ -90,34 +89,22 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 				return;
 			}
 			
-			//This is for sorting the temporary 4-node.
-			
-			FourNode tempFourNode;
-			
+			FourNode tempFourNode = null;
 			
 			//Key is less than left key, insert new value to the left. 
 			if (key.compareTo(foundNode.keyvalues1.key) == -1)
-			{
-				tempFourNode = new FourNode(new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues1, foundNode.keyvalues2);
-			}
+				tempFourNode = new FourNode(new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues1, foundNode.keyvalues2, 1);
+			
 			//Key is larger then the left key, and smaller then the right key, thus it should go in the middle.
-			if (key.compareTo(foundNode.keyvalues1.key) == 1 && key.compareTo(foundNode.keyvalues2.key) == -1)
-			{
-				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues2);
-				
-				rightMostValue = foundNode.keyvalues2;
-				foundNode.keyvalues2 = new KeyValuePair<K, Value1, Value2>(key, value);
-			}
+			else if (key.compareTo(foundNode.keyvalues1.key) == 1 && key.compareTo(foundNode.keyvalues2.key) == -1)
+				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues2, 1);
+			
 			//Key is more then the right key, insert new value in the right.
-			if (key.compareTo(foundNode.keyvalues2.key) == 1)
-			{
-				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, Value1, Value2>(key, value));
-				
-				rightMostValue = new KeyValuePair<K, Value1, Value2>(key, value);
-			}
+			else if (key.compareTo(foundNode.keyvalues2.key) == 1)
+				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, Value1, Value2>(key, value), 1);
 			
 			
-			putKeyValueInNode(foundNode, rightMostValue);
+			put4NodeInNode(foundNode, tempFourNode);
 		}
 		
 	}
@@ -154,234 +141,136 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 	private Node getNode(K key)
 	{
-		throw new UnsupportedOperationException();
+		
+		
+		
 	}
 	
-	private void putKeyValueInNode(Node currentNode, KeyValuePair<K, Value1, Value2> rightMostKey)
+	private void put4NodeInNode(Node currentNode, FourNode tmpFourNode)
 	{
 	
 		Node parent = currentNode.parent;
 		
 		//We are at the root node.
-		if (parent == null)
-		{
-			Node newRoot = new Node(currentNode.keyvalues2, 3);
-			newRoot.left = new Node (currentNode.keyvalues1, 1);
-			newRoot.middle = new Node (rightMostKey, 1);
-			
-			root = newRoot;
-			return;
-		}
+//		if (parent == null)
+//		{
+//			Node newRoot = new Node(currentNode.keyvalues2, 3);
+//			newRoot.left = new Node (currentNode.keyvalues1, 1);
+//			newRoot.middle = new Node (rightMostKey, 1);
+//			
+//			Node splitResult = Convert4to2(tmpFourNode);
+//			
+//			
+//			
+//			
+//			root = newRoot;
+//			return;
+//		}
 		
-		//If the parent is a TwoNode, we need to add the middle value in our current node somewhere in the parent node.
-		if(parent.keyvalues2 == null)
-		{
-			//If the current nodes middle key is less than parents first (and only) key.
-			if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == -1)
-			{	
-				parent.keyvalues2 = parent.keyvalues1;
-				parent.keyvalues1 = currentNode.keyvalues2;
-				
-				Node newLeft = new Node (currentNode.keyvalues1, 1);
-				newLeft.parent = parent;
-				
-				Node newMiddle = new Node (rightMostKey, 1);
-				newMiddle.parent = parent;
-				
-				
-				parent.right = parent.middle;
-				parent.middle = newMiddle;
-				parent.left = newLeft;
-			}
-			//If the current nodes middle key is greater than parents first (and only) key.
-			else if(currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == 1)
-			{
-				parent.keyvalues2 = currentNode.keyvalues2;
-				
-				Node newMiddle = new Node (currentNode.keyvalues1, 1);
-				newMiddle.parent = parent;
-				
-				Node newRight = new Node (rightMostKey, 1);
-				newRight.parent = parent;
-				
-				parent.middle = newMiddle;
-				parent.right = newRight;
-			}
-		}
-		else //ThreeNode.
-		{
-			Node splitResult = Convert4To2(currentNode);
-			
-			FourNode mergeResult = MergeNodes (parent, splitResult);
-			
-			putNodeInNode(mergeResult);
-			
-			
-			KeyValuePair<K, Value1, Value2> rightMostKeyParent = null; 
-			Node rightMostNode = null;
-			
-			
-			//Middle element in child is less than first key in parent.
-			if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == -1)
-			{
-				rightMostKeyParent = parent.keyvalues2;
-				parent.keyvalues2 = parent.keyvalues1;
-				parent.keyvalues1 = currentNode.keyvalues2;
-				
-				
-				Node newLeft = new Node(currentNode.keyvalues1, 1);
-				Node newMiddle = new Node (rightMostKey, 1);
-				
-				rightMostNode = parent.right;
-				parent.right = parent.middle;
-				
-				parent.middle = newMiddle;
-				parent.left = newLeft;
-			}
-			else if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == 1 && currentNode.keyvalues2.key.compareTo(parent.keyvalues2.key) == -1)
-			{
-				rightMostKeyParent = parent.keyvalues2;
-				parent.keyvalues2 = currentNode.keyvalues2;
-				
-				Node newMiddle = new Node(currentNode.keyvalues1, 1);
-				Node newRight = new Node (rightMostKey, 1);
-				
-				rightMostNode = parent.right;
-				parent.right = newRight;
-				parent.middle = newMiddle;
-			}
-			else if (currentNode.keyvalues2.key.compareTo(parent.keyvalues2.key) == 1) //Middle element in child is larger than second key in parent.
-			{
-				rightMostKeyParent = parent.keyvalues2;
-				
-				rightMostNode = new Node(rightMostKey, 1);
-				Node newRight = new Node(currentNode.keyvalues1, 1);
-				
-				parent.right = newRight;
-			}
-			
-			
-			putNodeInNode(currentNode.parent, rightMostNode);
-			
-		}
-	}
+		//Split the FourNode into a TwoNode.	
+		Node splitResult = Convert4to2(tmpFourNode);
 		
-
-	private void putNodeInNode(Node currentNode, Node rightMostNode)
-	{
-	
-		Node parent = currentNode.parent;
+		//Merge with the parent.
+		FourNode mergeResult = MergeNodes (parent, splitResult);
 		
-		//If we have managed to climb to the top of our mountain.
-//			if (parent == root)
-//			{
-//				if (key < parent.keyvalues1)
-//				{
-//					root = new TwoNode(parent.keyvalues1);
-//					root.left = new TwoNode (key, values);
-//					root.right = new TwoNode(parent.keyvalues2);
-//				}
-//				else if (key > parent.keyvalues1 && key < parent.keyvalues2)
-//				{
-//					root = new TwoNode(key, values);
-//				}
-//				else if (key > parent.keyvalues2)
-//				{
-//					root = new TwoNode(parent.keyvalues2);
-//				}
+		//If the merge result is null parent was a TwoNode, and we are done.
+		// If not, we need to merge the new FourNode we have with
+		if (mergeResult != null)
+			put4NodeInNode(parent.parent, mergeResult);
+		
+//		
+//		
+//		//If the parent is a TwoNode, we need to add the middle value in our current node somewhere in the parent node.
+//		if(parent.keyvalues2 == null)
+//		{
+//			//If the current nodes middle key is less than parents first (and only) key.
+//			if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == -1)
+//			{	
+//				parent.keyvalues2 = parent.keyvalues1;
+//				parent.keyvalues1 = currentNode.keyvalues2;
 //				
-//				return;
+//				Node newLeft = new Node (currentNode.keyvalues1, 1);
+//				newLeft.parent = parent;
+//				
+//				Node newMiddle = new Node (rightMostKey, 1);
+//				newMiddle.parent = parent;
+//				
+//				
+//				parent.right = parent.middle;
+//				parent.middle = newMiddle;
+//				parent.left = newLeft;
 //			}
-		
-		//TODO: Also check if we have a two node, then we can insert our node there.
-		
-		
-		//If the parent is a TwoNode, we need to add the middle value in our current node somewhere in the parent node.
-		if(parent.keyvalues2 == null)
-		{
-			//If the current nodes middle key is less than parents first (and only) key.
-			if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == -1)
-			{	
-				parent.keyvalues2 = parent.keyvalues1;
-				parent.keyvalues1 = currentNode.keyvalues2;
-				
-				Node newLeft = new Node (currentNode.keyvalues1, 1);
-				newLeft.parent = parent;
-				
-				Node newMiddle = new Node (rightMostKey, 1);
-				newMiddle.parent = parent;
-				
-				
-				parent.right = parent.middle;
-				parent.middle = newMiddle;
-				parent.left = newLeft;
-			}
-			//If the current nodes middle key is greater than parents first (and only) key.
-			else if(currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == 1)
-			{
-				parent.keyvalues2 = currentNode.keyvalues2;
-				
-				Node newMiddle = new Node (currentNode.keyvalues1, 1);
-				newMiddle.parent = parent;
-				
-				Node newRight = new Node (rightMostKey, 1);
-				newRight.parent = parent;
-				
-				parent.middle = newMiddle;
-				parent.right = newRight;
-			}
-		}
-		else //ThreeNode.
-		{
-			KeyValuePair<K, Value1, Value2> rightMostKeyParent = null; 
-			Node rightMostNode;
-			
-			
-			//Middle element in child is less than first key in parent.
-			if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == -1)
-			{
-				rightMostKeyParent = parent.keyvalues2;
-				parent.keyvalues2 = parent.keyvalues1;
-				parent.keyvalues1 = currentNode.keyvalues2;
-				
-				
-				Node newLeft = new Node(currentNode.keyvalues1, 1);
-				Node newMiddle = new Node (rightMostKey, 1);
-				
-				rightMostNode = parent.right;
-				parent.right = parent.middle;
-				
-				parent.middle = newMiddle;
-				parent.left = newLeft;
-			}
-			else if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == 1 && currentNode.keyvalues2.key.compareTo(parent.keyvalues2.key) == -1)
-			{
-				rightMostKeyParent = parent.keyvalues2;
-				parent.keyvalues2 = currentNode.keyvalues2;
-				
-				Node newMiddle = new Node(currentNode.keyvalues1, 1);
-				Node newRight = new Node (rightMostKey, 1);
-				
-				rightMostNode = parent.right;
-				parent.right = newRight;
-				parent.middle = newMiddle;
-			}
-			else if (currentNode.keyvalues2.key.compareTo(parent.keyvalues2.key) == 1) //Middle element in child is larger than second key in parent.
-			{
-				rightMostKeyParent = parent.keyvalues2;
-				
-				rightMostNode = new Node(rightMostKey, 1);
-				Node newRight = new Node(currentNode.keyvalues1, 1);
-				
-				parent.right = newRight;
-			}
-			
-			
-			putKeyValueInNode(currentNode.parent, rightMostNode);
-			
-		}
-
-		
+//			//If the current nodes middle key is greater than parents first (and only) key.
+//			else if(currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == 1)
+//			{
+//				parent.keyvalues2 = currentNode.keyvalues2;
+//				
+//				Node newMiddle = new Node (currentNode.keyvalues1, 1);
+//				newMiddle.parent = parent;
+//				
+//				Node newRight = new Node (rightMostKey, 1);
+//				newRight.parent = parent;
+//				
+//				parent.middle = newMiddle;
+//				parent.right = newRight;
+//			}
+//		}
+//		else //ThreeNode.
+//		{
+//			Node splitResult = Convert4To2(currentNode);
+//			
+//			FourNode mergeResult = MergeNodes (parent, splitResult);
+//			
+//			putNodeInNode(mergeResult);
+//			
+//			
+//			KeyValuePair<K, Value1, Value2> rightMostKeyParent = null; 
+//			Node rightMostNode = null;
+//			
+//			
+//			//Middle element in child is less than first key in parent.
+//			if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == -1)
+//			{
+//				rightMostKeyParent = parent.keyvalues2;
+//				parent.keyvalues2 = parent.keyvalues1;
+//				parent.keyvalues1 = currentNode.keyvalues2;
+//				
+//				
+//				Node newLeft = new Node(currentNode.keyvalues1, 1);
+//				Node newMiddle = new Node (rightMostKey, 1);
+//				
+//				rightMostNode = parent.right;
+//				parent.right = parent.middle;
+//				
+//				parent.middle = newMiddle;
+//				parent.left = newLeft;
+//			}
+//			else if (currentNode.keyvalues2.key.compareTo(parent.keyvalues1.key) == 1 && currentNode.keyvalues2.key.compareTo(parent.keyvalues2.key) == -1)
+//			{
+//				rightMostKeyParent = parent.keyvalues2;
+//				parent.keyvalues2 = currentNode.keyvalues2;
+//				
+//				Node newMiddle = new Node(currentNode.keyvalues1, 1);
+//				Node newRight = new Node (rightMostKey, 1);
+//				
+//				rightMostNode = parent.right;
+//				parent.right = newRight;
+//				parent.middle = newMiddle;
+//			}
+//			else if (currentNode.keyvalues2.key.compareTo(parent.keyvalues2.key) == 1) //Middle element in child is larger than second key in parent.
+//			{
+//				rightMostKeyParent = parent.keyvalues2;
+//				
+//				rightMostNode = new Node(rightMostKey, 1);
+//				Node newRight = new Node(currentNode.keyvalues1, 1);
+//				
+//				parent.right = newRight;
+//			}
+//			
+//			
+//			putNodeInNode(currentNode.parent, rightMostNode);
+//			
+//		}
 	}
 	
 	private Node Convert4to2(FourNode inNode)
@@ -403,17 +292,17 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		//Create a new root node, b, from the middle keyvalue.
 		Node newRoot = new Node (inNode.keyvalues2, inNode.N +2);
 		
-		//New left, a, is the first element. New right, c, is the extra element (right most key).
+		//New left, a, is the left child. New right, c, is the right child.
 		Node newLeft = new Node (inNode.keyvalues1, inNode.N);
-		Node newRight = new Node (rightMostKey, inNode.N);
+		Node newRight = new Node (inNode.keyvalues3, inNode.N);
 		
 		//Get the two left most children to the newLeft node.
 		newLeft.left = inNode.left;
 		newLeft.right = inNode.middle;
 		
 		//Get the two right most children to the newRight node.
-		newRight.left = inNode.right;
-		newRight.right = rightMostChild;
+		newRight.left = inNode.middle2;
+		newRight.right = inNode.right;
 		
 		//Set the new children to the bNode.
 		newRoot.left = newLeft;
@@ -425,9 +314,6 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	private FourNode MergeNodes(Node treeNode, Node separateNode)
 	{
 		//The separate node we are sending in is assumed to be a TwoNode.
-		KeyValuePair rightMostKey;
-		Node rightMostChild;
-		
 		
 		//If the node in the tree we are merging with is a two node.
 		if (treeNode.keyvalues2 == null)
@@ -455,30 +341,45 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 				treeNode.middle = separateNode.left;
 			}
 			
-			
+			return null;
 		}
 		else //If the node in the tree we are merging with is a three node.
 		{
+			FourNode tmpFourNode;
+			
 			
 			//If the key in the separate node is smaller than the three node's first key.
 			if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) == -1)
 			{
 				
-				treeNode.keyvalues2 = treeNode.keyvalues1
+				tmpFourNode = new FourNode(separateNode.keyvalues1, treeNode.keyvalues1, treeNode.keyvalues2, 1);
 				
-				
+				tmpFourNode.left = separateNode.left;
+				tmpFourNode.middle = separateNode.right;
+				tmpFourNode.middle2 = treeNode.middle;
+				tmpFourNode.right = treeNode.right;
 			}
 			else if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) == 1 && separateNode.keyvalues1.key.compareTo(treeNode.keyvalues2.key) == -1)
 			{
+				tmpFourNode = new FourNode(treeNode.keyvalues1, separateNode.keyvalues1, treeNode.keyvalues2, 1);
 				
-				
-				
+				tmpFourNode.left = treeNode.left;
+				tmpFourNode.middle = separateNode.left;
+				tmpFourNode.middle2 = separateNode.right;
+				tmpFourNode.right = treeNode.right;
 			}
 			else //If not smaller or in the middle of our values it must be bigger.
 			{
+				tmpFourNode = new FourNode(treeNode.keyvalues1, treeNode.keyvalues2, separateNode.keyvalues1, 1);
 				
+				tmpFourNode.left = treeNode.left;
+				tmpFourNode.middle = treeNode.middle;
+				tmpFourNode.middle2 = separateNode.left;
+				tmpFourNode.right = separateNode.right;
 			}
 			
+			
+			return tmpFourNode;
 		}
 		
 	}
