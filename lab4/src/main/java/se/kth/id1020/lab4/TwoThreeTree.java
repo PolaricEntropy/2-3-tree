@@ -1,6 +1,8 @@
 package se.kth.id1020.lab4;
 
-public class TwoThreeTree<K extends Comparable<K>, V> {
+import java.util.Iterator;
+
+public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 
 	private Node root;
 	private int splitCount = 0; //We are only creating new nodes when splitting. Just count the splits and we get the size.
@@ -165,7 +167,11 @@ public class TwoThreeTree<K extends Comparable<K>, V> {
 	
 	public int howMuchMore()
 	{
-		throw new UnsupportedOperationException();
+		//Get the number of nodes for root. Number of TwoNodes is in index 0.
+		int[] totalRes = CountNodeTypes(root);
+		
+		//We can add TwoNodeCount + 1 keys before we increase depth.
+		return totalRes[0] +1;
 	}
 	
 	public float density()
@@ -443,6 +449,12 @@ public class TwoThreeTree<K extends Comparable<K>, V> {
 			return tmpFourNode;
 		}
 		
+	}
+
+	
+	public Iterator<K> iterator() {
+	
+		return null;
 	}
 	
 }
