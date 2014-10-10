@@ -39,6 +39,23 @@ public class Driver {
 //		tree.put("ä", new ValuePair<Integer, Integer>(28, 7987));
 //		tree.put("ö", new ValuePair<Integer, Integer>(29, 7987));
 		
+//		tree.put("ö", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("ä", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("å", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("z", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("y", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("x", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("w", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("v", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("u", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("t", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("s", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("r", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("q", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("p", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("o", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("n", new ValuePair<Integer, Integer>(33, 7987));
+		
 		//System.out.print(tree.get("1"));
 		
 //		System.out.print(tree.get("a").x + ", ");
@@ -77,10 +94,12 @@ public class Driver {
 		
 		URL url = Driver.class.getResource("kap1.txt");
 		In input = new In(url);
-		while (!input.isEmpty()) {
+		while (!input.isEmpty())
+		{
 			String line = input.readLine().trim();
 			String[] words = line.split(" ");
-			for (String word : words) {
+			for (String word : words)
+			{
 				System.out.println(word);
 				
 				

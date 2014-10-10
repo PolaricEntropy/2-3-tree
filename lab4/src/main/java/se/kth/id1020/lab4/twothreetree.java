@@ -355,7 +355,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 				tmpFourNode = new FourNode(separateNode.keyvalues1, treeNode.keyvalues1, treeNode.keyvalues2);
 				
 				tmpFourNode.left = separateNode.left;
-				tmpFourNode.middle = separateNode.right;
+				tmpFourNode.middle = separateNode.middle;
 				tmpFourNode.middle2 = treeNode.middle;
 				tmpFourNode.right = treeNode.right;
 			}
