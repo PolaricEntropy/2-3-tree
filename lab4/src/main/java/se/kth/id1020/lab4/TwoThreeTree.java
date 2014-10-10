@@ -2,10 +2,10 @@ package se.kth.id1020.lab4;
 
 import java.util.Iterator;
 
-public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
+public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
 
 	private Node root;
-	private int splitCount = 0; //We are only creating new nodes when splitting. Just count the splits and we get the size.
+	private int splitCount = 0; //We are only creating new nodes when splitting (with a few exceptions). Just count the splits and we get the size.
 	
 	public class Node
 	{
@@ -36,17 +36,19 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 		}
 	}
 	
-	/***
+	/**
 	 * Retrieves the value of the key stored in the tree. If the key is not in the tree a null value is returned.
 	 * @param key The key to find in the tree.
 	 * @return The value that's associated with the specified key, returns null if the key is not found.
 	 */
 	public V get(K key)
 	{
-		Node searchResult = get(key, root);
+		//Search for our key.
+		Node searchResult = getNode(key, root, true);
 		
 		if (searchResult != null)
 		{
+			//Since it can be either a two or a ThreeNode we need to return the correct value.
 			if (searchResult.keyvalues1.key.equals(key))
 				return searchResult.keyvalues1.value;
 			else
@@ -74,14 +76,13 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 		//Create a TwoNode and store our key/value in it, done.
 		if (root == null)
 		{
-			//
 			root = new Node(new KeyValuePair<K, V>(key, value));
-			splitCount = 1;
+			splitCount = 1; //We need to add 1 to our size variable, we have not done a split, but we have one node now.
 			return;
 		}
 		
 		//Find the node we should add the key/value to.
-		Node foundNode = getNode(key, root);
+		Node foundNode = getNode(key, root, false);
 		
 		//If the node is a TwoNode, then it's simple. Convert that TwoNode to a ThreeNode and add.
 		//Since we are always adding from the bottom we don't have any children to take into account.
@@ -132,22 +133,32 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 			put4NodeInNode(foundNode, tempFourNode);
 		}
 	}
-	
+
+	/**
+	 * Returns the number of nodes in our tree.
+	 * @return An integer of how many nodes the entire tree has.
+	 */
 	public int size()
 	{
 		return splitCount;
 	}
 	
+	//No time to implement now.
 	public Iterable<K> keys()
 	{
 		throw new UnsupportedOperationException();
 	}
 	
+	//No time to implement now.
 	public Iterable<K> keys(K lo, K hi)
 	{
 		throw new UnsupportedOperationException();
 	}
 	
+	/**
+	 * Returns the depth of the entire tree, since it's a balanced tree the depth is the same in the entire tree.
+	 * @return The depth as an int. A tree with just one node (root) will have a depth of 0.
+	 */
 	public int depth()
 	{
 		//The tree is balanced, so we have the same depth everywhere. 
@@ -155,16 +166,21 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 		
 		Node curNode = root; 
 		
+		//Just go left until we have no children any more, count each "level".
 		while (curNode != null)
 		{
 			curNode = curNode.left;
 			depthCount++;
 		}
-		depthCount--;
+		depthCount--; //We counted the "null-level" under the leaf, remove that.
 		
 		return depthCount;
 	}
 	
+	/**
+	 * Returns the number of elements we can add to the tree before our depth changes.
+	 * @return Returns the remaining elements we can add before our tree grows in depth.
+	 */
 	public int howMuchMore()
 	{
 		//Get the number of nodes for root. Number of TwoNodes is in index 0.
@@ -174,18 +190,27 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 		return totalRes[0] +1;
 	}
 	
+	/**
+	 * Returns the average value of two and threeNodes in our tree.
+	 * @return The value as a float.
+	 */
 	public float density()
 	{
 		//Get the number of TwoNodes and ThreeeNodes in our tree. TwoNodes is stored at index 0, ThreeNodes at 1.
 		int[] totalRes = CountNodeTypes(root);
 		
-		//Average value of the number of Two and ThreeNodes.
+		//Average value of the number of TwoNodes and ThreeNodes. Need to multiply by 2 and 3 because that's their weight.
 		return (float) (totalRes[0]*2 + totalRes[1]*3) / (totalRes[0] + totalRes[1]);
 	}
-	
+
+	/**
+	 * Counts the number of TwoNodes and ThreeNodes in the specified node (included).
+	 * @param curNode The node that we wish to count.
+	 * @return A int[] with TwoNode count at index 0 and ThreeNode count at index 1.
+	 */
 	private int[] CountNodeTypes (Node curNode) {
 		
-		//childRes, index 0 is TwoNodeCount, index 1 is ThreeNodeCount.
+		//totalRes: index 0 is TwoNodeCount, index 1 is ThreeNodeCount.
 		int[] totalRes = new int[2];
 		
 		//Current node is a... TwoNode.
@@ -219,73 +244,53 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 		return totalRes;
 	}
 	
-	private Node getNode(K key, Node startNode)
+	/**
+	 * Gets the node with the specified key, or the node where the specified key should be.
+	 * @param key The key to search for.
+	 * @param startNode String node for our search.
+	 * @param returnNullOnMissing If the key is missing in the tree, should return null or the node the key should be stored in.
+	 * @return Returns a Node where the specified key is or should be.
+	 */
+	private Node getNode(K key, Node startNode, boolean returnNullOnMissing)
 	{
-		if (startNode.left == null)
-			return startNode;
-		
-		//If smaller than the first value.
-		if (key.compareTo(startNode.keyvalues1.key) <= -1)
+		//If we should return null on a missing key then the branch we've just gone into will be null if it is where the key should be.
+		if (returnNullOnMissing)
 		{
-			return getNode(key, startNode.left);
+			if(startNode == null)
+				return null;
+		}
+		else //If we should find the node the key should be in, we need to check for an empty branch before going down, so we can return before that happens. 
+		{
+			//Doesn't matter what branch we check for nulls since we have a balanced tree, if any branch is null we have a leaf node.
+			if (startNode.left == null)
+				return startNode;
 		}
 		
+		//If smaller than the first value, this is the same for both TwoNodes and ThreeNodes. 
+		if (key.compareTo(startNode.keyvalues1.key) < 0)
+			return getNode(key, startNode.left, returnNullOnMissing);
 		
 		//TwoNode.
 		if (startNode.keyvalues2 == null)
 		{
 			//If equal to our value.
-			if (key.compareTo(startNode.keyvalues1.key) == 0)
+			if (key.equals(startNode.keyvalues1.key))
 				return startNode;
-			else
-				return getNode(key, startNode.middle);
+			else //If not equal then it must be greater than, since we've done the lesser than comparison already.
+				return getNode(key, startNode.middle, returnNullOnMissing);
 		}
 		else //ThreeNode
 		{
 			//If equal to our first or second value.
-			if (key.compareTo(startNode.keyvalues1.key) == 0 || key.compareTo(startNode.keyvalues2.key) == 0)
+			if (key.equals(startNode.keyvalues1.key) || key.equals(startNode.keyvalues2.key))
 				return startNode;
 			
 			//If in the middle.
-			if (key.compareTo(startNode.keyvalues1.key) >= 1 && key.compareTo(startNode.keyvalues2.key) <= -1)
-				return getNode(key, startNode.middle);
+			if (key.compareTo(startNode.keyvalues1.key) > 0 && key.compareTo(startNode.keyvalues2.key) < 0)
+				return getNode(key, startNode.middle, returnNullOnMissing);
 			else //If greater than our second value.
-				return getNode(key, startNode.right);
+				return getNode(key, startNode.right, returnNullOnMissing);
 		}	
-	}
-	
-	private Node get(K key, Node startNode)
-	{
-		if (startNode == null)
-			return null;
-		
-		//If smaller than the first value.
-		if (key.compareTo(startNode.keyvalues1.key) <= -1)
-			return get(key, startNode.left);
-		
-		
-		//TwoNode.
-		if (startNode.keyvalues2 == null)
-		{
-			//If equal to our value.
-			if (key.compareTo(startNode.keyvalues1.key) == 0)
-				return startNode;
-			else
-				return get(key, startNode.middle);
-		}
-		else //ThreeNode
-		{
-			//If equal to our first or second value.
-			if (key.compareTo(startNode.keyvalues1.key) == 0 || key.compareTo(startNode.keyvalues2.key) == 0)
-				return startNode;
-			
-			//If in the middle.
-			if (key.compareTo(startNode.keyvalues1.key) >= 1 && key.compareTo(startNode.keyvalues2.key) <= -1)
-				return get(key, startNode.middle);
-			else //If greater than our second value.
-				return get(key, startNode.right);
-		}
-		
 	}
 	
 	private void put4NodeInNode(Node currentNode, FourNode tmpFourNode)
@@ -450,11 +455,25 @@ public class TwoThreeTree<K extends Comparable<K>, V> implements Iterable<K>{
 		}
 		
 	}
+	
+//	public Iterator<K> iterator() {
+//		return new this.TwoThreeTreeIterator<K>();
+//	}
+//	
+//	
+//	public class TwoThreeTreeIterator <Ke extends Comparable<K>> implements Iterator<Ke> {
+//
+//		public boolean hasNext() {
+//			// TODO Auto-generated method stub
+//			return false;
+//		}
+//
+//		public K next() {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
+//
+//	}
 
-	
-	public Iterator<K> iterator() {
-	
-		return null;
-	}
 	
 }
