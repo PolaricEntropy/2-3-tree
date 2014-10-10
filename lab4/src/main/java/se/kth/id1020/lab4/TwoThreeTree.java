@@ -1,22 +1,22 @@
 package se.kth.id1020.lab4;
 
-public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
+public class TwoThreeTree<K extends Comparable<K>, V> {
 
 	private Node root;
-	private int countSplit = 0;
+	private int splitCount = 0; //We are only creating new nodes when splitting. Just count the splits and we get the size.
 	
 	public class Node
 	{
-		protected KeyValuePair<K, Value1, Value2> keyvalues1;
-		protected KeyValuePair<K, Value1, Value2> keyvalues2;
+		protected KeyValuePair<K, V> keyvalues1;
+		protected KeyValuePair<K, V> keyvalues2;
 		protected Node parent, left, middle, right;
 		
-		public Node(KeyValuePair<K, Value1, Value2> keyValues1)
+		public Node(KeyValuePair<K, V> keyValues1)
 		{
 			this.keyvalues1 = keyValues1;
 		}
 		
-		public Node(KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2)
+		public Node(KeyValuePair<K, V> keyValues1, KeyValuePair<K, V> keyValues2)
 		{
 			this(keyValues1);
 			this.keyvalues2 = keyValues2;
@@ -24,10 +24,10 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 	}
 	public class FourNode extends Node
 	{
-		protected KeyValuePair<K, Value1, Value2> keyvalues3;
+		protected KeyValuePair<K, V> keyvalues3;
 		protected Node middle2;
 		
-		public FourNode (KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2, KeyValuePair<K, Value1, Value2> keyValues3)
+		public FourNode (KeyValuePair<K, V> keyValues1, KeyValuePair<K, V> keyValues2, KeyValuePair<K, V> keyValues3)
 		{
 			super(keyValues1, keyValues2);
 			this.keyvalues3 = keyValues3;
@@ -39,7 +39,7 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 	 * @param key The key to find in the tree.
 	 * @return The value that's associated with the specified key, returns null if the key is not found.
 	 */
-	public ValuePair<Value1, Value2> get(K key)
+	public V get(K key)
 	{
 		Node searchResult = get(key, root);
 		
@@ -54,7 +54,12 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 			return null;
 	}
 	
-	public void put(K key, ValuePair<Value1, Value2> value)
+	/**
+	 * Inserts the key (with associated value) into the tree.
+	 * @param key The key to insert.
+	 * @param value The value associated with the key. Can not be null.
+	 */
+	public void put(K key, V value)
 	{
 		//Null values are not supported, cause then get will not work properly.
 		//Assume we store a null value and then get will return that null value. The calling
@@ -67,37 +72,32 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 		//Create a TwoNode and store our key/value in it, done.
 		if (root == null)
 		{
-			//Size of 1 since we just have one node.
-			root = new Node(new KeyValuePair<K, Value1, Value2>(key, value));
-			countSplit = 1;
+			//
+			root = new Node(new KeyValuePair<K, V>(key, value));
+			splitCount = 1;
 			return;
 		}
 		
-		//Find the node we should add stuff to.
+		//Find the node we should add the key/value to.
 		Node foundNode = getNode(key, root);
 		
-		//If the node is a TwoNode, then it's simple. Convert that TwoNode to a ThreeNode.
+		//If the node is a TwoNode, then it's simple. Convert that TwoNode to a ThreeNode and add.
+		//Since we are always adding from the bottom we don't have any children to take into account.
 		if (foundNode.keyvalues2 == null)
 		{
-			if (key.compareTo(foundNode.keyvalues1.key) <= -1)
+			if (key.compareTo(foundNode.keyvalues1.key) < 0)		//Key is less than key in node.
 			{
-				//Insert new stuff at the left, thus we need to move that data.
+				//We need to move stuff if we are inserting to the left.
 				foundNode.keyvalues2 = foundNode.keyvalues1;
-				foundNode.keyvalues1 = new KeyValuePair<K, Value1, Value2>(key, value);
+				foundNode.keyvalues1 = new KeyValuePair<K, V>(key, value);
 			}
-			else if (key.compareTo(foundNode.keyvalues1.key) == 0)
-			{
-				//Just replace the value of the key.
+			else if (key.equals(foundNode.keyvalues1.key)) 			//Equal to key in node, replace value.
 				foundNode.keyvalues1.value = value;
-			}
-			else if (key.compareTo(foundNode.keyvalues1.key) >= 1)
-			{
-				foundNode.keyvalues2 = new KeyValuePair<K, Value1, Value2>(key, value);
-			}
+			else if (key.compareTo(foundNode.keyvalues1.key) > 0) 	//Key is greater than key in node.
+				foundNode.keyvalues2 = new KeyValuePair<K, V>(key, value);
 			
-			return;
 		}
-		else //If the node is a ThreeNode, then it's more complicated. Create a temporary 4-node, split it and merge the parent back into the tree.
+		else //If the node is a ThreeNode, then it's more complicated. Create a temporary FourNode, split it to a TwoNode and merge that back into the tree.
 		{		
 
 			//If we have any key with the key we are trying to add, then just replace those values.  
@@ -116,24 +116,24 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 			
 			//Key is less than left key, insert new value to the left. 
 			if (key.compareTo(foundNode.keyvalues1.key) <= -1)
-				tempFourNode = new FourNode(new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues1, foundNode.keyvalues2);
+				tempFourNode = new FourNode(new KeyValuePair<K, V>(key, value), foundNode.keyvalues1, foundNode.keyvalues2);
 			
 			//Key is larger then the left key, and smaller then the right key, thus it should go in the middle.
 			else if (key.compareTo(foundNode.keyvalues1.key) >= 1 && key.compareTo(foundNode.keyvalues2.key) <= -1)
-				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues2);
+				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, V>(key, value), foundNode.keyvalues2);
 			
 			//Key is more then the right key, insert new value in the right.
 			else if (key.compareTo(foundNode.keyvalues2.key) >= 1)
-				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, Value1, Value2>(key, value));
+				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, V>(key, value));
 			
+			//Insert this FourNode into the tree.
 			put4NodeInNode(foundNode, tempFourNode);
 		}
-		
 	}
 	
 	public int size()
 	{
-		return countSplit;
+		return splitCount;
 	}
 	
 	public Iterable<K> keys()
@@ -173,6 +173,7 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 		//Get the number of TwoNodes and ThreeeNodes in our tree. TwoNodes is stored at index 0, ThreeNodes at 1.
 		int[] totalRes = CountNodeTypes(root);
 		
+		//Average value of the number of Two and ThreeNodes.
 		return (float) (totalRes[0]*2 + totalRes[1]*3) / (totalRes[0] + totalRes[1]);
 	}
 	
@@ -211,8 +212,6 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 
 		return totalRes;
 	}
-	
-	
 	
 	private Node getNode(K key, Node startNode)
 	{
@@ -288,14 +287,13 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 	
 		//Split the FourNode into a TwoNode.	
 		Node splitResult = Convert4to2(tmpFourNode);
-		countSplit++;
+		splitCount++;
 		
 		if (currentNode == root)
 		{
 			root = splitResult;
-			countSplit++;
+			splitCount++;
 		}
-			
 		else
 		{
 			Node parent = currentNode.parent;
@@ -446,6 +444,5 @@ public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 		}
 		
 	}
-	
 	
 }
