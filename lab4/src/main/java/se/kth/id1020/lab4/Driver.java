@@ -122,7 +122,7 @@ public class Driver {
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
-		
+		System.out.println("Density: " + tree.density());		
 	}
 
 }

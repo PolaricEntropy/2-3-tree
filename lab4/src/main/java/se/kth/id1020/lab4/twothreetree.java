@@ -165,8 +165,49 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 	public float density()
 	{
-		throw new UnsupportedOperationException();
+		//Get the number of TwoNodes and ThreeeNodes in our tree. TwoNodes is stored at index 0, ThreeNodes at 1.
+		int[] totalRes = CountNodeTypes(root);
+		
+		return (float) (totalRes[0]*2 + totalRes[1]*3) / (totalRes[0] + totalRes[1]);
 	}
+	
+	private int[] CountNodeTypes (Node curNode) {
+		
+		//childRes, index 0 is TwoNodeCount, index 1 is ThreeNodeCount.
+		int[] totalRes = new int[2];
+		
+		//Current node is a... TwoNode.
+		if (curNode.keyvalues2 == null)
+			totalRes[0]++;
+		else //... ThreeNode.
+			totalRes[1]++;
+		
+		//Count the left children if we have any.
+		if (curNode.left != null)
+		{
+			int[] childRes = CountNodeTypes(curNode.left);
+			totalRes[0] += childRes[0];
+			totalRes[1] += childRes[1];
+		}
+
+		//Count the middle children if we have any.
+		if (curNode.middle != null) {
+			int[] childRes = CountNodeTypes(curNode.middle);
+			totalRes[0] += childRes[0];
+			totalRes[1] += childRes[1];
+		}
+
+		//Count the right children if we have any.
+		if (curNode.right != null) {
+			int[] childRes = CountNodeTypes(curNode.right);
+			totalRes[0] += childRes[0];
+			totalRes[1] += childRes[1];
+		}
+
+		return totalRes;
+	}
+	
+	
 	
 	private Node getNode(K key, Node startNode)
 	{
