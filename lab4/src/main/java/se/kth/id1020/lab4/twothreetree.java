@@ -143,7 +143,19 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 	public int depth()
 	{
-		throw new UnsupportedOperationException();
+		//The tree is balanced, so we have the same depth everywhere. 
+		int depthCount = 0;
+		
+		Node curNode = root; 
+		
+		while (curNode != null)
+		{
+			curNode = curNode.left;
+			depthCount++;
+		}
+		depthCount--;
+		
+		return depthCount;
 	}
 	
 	public int howMuchMore()
