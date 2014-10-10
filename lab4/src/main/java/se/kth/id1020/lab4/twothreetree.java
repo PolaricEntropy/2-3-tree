@@ -21,7 +21,48 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		{
 			this(keyValues1, N);
 			this.keyvalues2 = keyValues2;
-		}	
+		} 
+		
+		public int kSize() {
+			return kSize(root);
+		}
+		
+		private int kSize(Node parent) {
+			int size = 0;
+			
+			if (parent.left != null) {
+				++size;
+				size += kSize(parent.left);
+			}
+			
+			if (parent.middle != null) {
+				++size;
+				size += kSize(parent.middle);
+			}
+			
+			if (parent.right != null) {
+				++size;
+				size += kSize(parent.right);
+			}
+			
+			return size;
+		}
+		
+		public void updateSize()
+		{
+			//Count this node.
+			N = 1;
+			
+			if(left != null)
+				N += left.N;
+				
+			if(middle != null)	
+				N += middle.N;
+				
+			if (right != null)	
+				N += right.N;
+				
+		}
 	}
 	public class FourNode extends Node
 	{
@@ -32,6 +73,13 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		{
 			super(keyValues1, keyValues2, N);
 			this.keyvalues3 = keyValues3;
+		}
+		
+		public void updateSize()
+		{
+			super.updateSize();
+			
+			N += middle2.N;
 		}
 	}
 	
@@ -50,8 +98,19 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			return null;
 	}
 	
+	public int kSize() {
+		return root.kSize();
+	} 
+	
 	public void put(K key, ValuePair<Value1, Value2> value)
 	{
+		//Null values are not supported, cause then get will not work properly.
+		//Assume we store a null value and then get will return that null value. The calling
+		//code will then not know if we have found the value (that is null) or if the search
+		//was unsuccessful and that's why we are returning null. 
+		if (value == null)
+			throw new IllegalArgumentException("Null values not supported!");
+		
 		//If we don't have a root node we don't have a tree.
 		//Create a TwoNode and store our key/value in it, done.
 		if (root == null)
@@ -121,7 +180,15 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 	public int size()
 	{
-		throw new UnsupportedOperationException();
+		return size(root);
+	}
+	
+	private int size(Node x)
+	{
+		if (x == null)
+			return 0;
+		else
+			return x.N;
 	}
 	
 	public Iterable<K> keys()
@@ -191,7 +258,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		
 		//If smaller than the first value.
 		if (key.compareTo(startNode.keyvalues1.key) <= -1)
-			return getNode(key, startNode.left);
+			return get(key, startNode.left);
 		
 		
 		//TwoNode.
@@ -201,7 +268,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			if (key.compareTo(startNode.keyvalues1.key) == 0)
 				return startNode;
 			else
-				return getNode(key, startNode.right);
+				return get(key, startNode.middle);
 		}
 		else //ThreeNode
 		{
@@ -211,9 +278,9 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			
 			//If in the middle.
 			if (key.compareTo(startNode.keyvalues1.key) >= 1 && key.compareTo(startNode.keyvalues2.key) <= -1)
-				return getNode(key, startNode.middle);
+				return get(key, startNode.middle);
 			else //If greater than our second value.
-				return getNode(key, startNode.right);
+				return get(key, startNode.right);
 		}
 		
 	}
@@ -227,11 +294,11 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		if (currentNode == root)
 		{
 			root = splitResult;
-			splitResult.parent = root;
+			root.N ++;
 		}
+			
 		else
 		{
-		
 			Node parent = currentNode.parent;
 		
 			//Merge with the parent.
@@ -262,7 +329,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		//     /	 \ /     \
 		
 		//Create a new root node, b, from the middle keyvalue.
-		Node newRoot = new Node (inNode.keyvalues2, inNode.N +2);
+		Node newRoot = new Node (inNode.keyvalues2, inNode.N +1);
 		
 		//New left, a, is the left child. New right, c, is the right child.
 		Node newLeft = new Node (inNode.keyvalues1, inNode.N);
@@ -270,13 +337,29 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		
 		//Get the two left most children to the newLeft node.
 		newLeft.parent = newRoot;
+		
 		newLeft.left = inNode.left;
+		
+		if (newLeft.left != null)
+			newLeft.left.parent = newLeft;
+		
 		newLeft.middle = inNode.middle;
+		
+		if (newLeft.middle != null)
+			newLeft.middle.parent = newLeft;
 		
 		//Get the two right most children to the newRight node.
 		newRight.parent = newRoot;
+		
 		newRight.left = inNode.middle2;
+		
+		if (newRight.left != null)
+			newRight.left.parent = newRight;
+		
 		newRight.middle = inNode.right;
+		
+		if(newRight.middle != null)
+			newRight.middle.parent = newRight;
 		
 		//Set the new children to the NewRoot.
 		newRoot.left = newLeft;
@@ -317,6 +400,20 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			//Don't forget to relink the parent property.
 			separateNode.middle.parent = treeNode;
 			separateNode.left.parent = treeNode;
+			
+			//Update our own size.
+			treeNode.updateSize();
+			//treeNode.N = (separateNode.N) + (separateNode.middle.N);
+			
+			//Start updating our parents sizes.
+			Node curNode = treeNode.parent;
+			
+			while (curNode != null)
+			{
+				//Recount as we have updated the number of children.
+				treeNode.updateSize();
+				curNode = curNode.parent;
+			}
 			
 			return null;
 		}
@@ -359,6 +456,9 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			tmpFourNode.middle.parent = tmpFourNode;
 			tmpFourNode.middle2.parent = tmpFourNode;
 			tmpFourNode.right.parent = tmpFourNode;
+			
+			tmpFourNode.updateSize();
+			
 			
 			return tmpFourNode;
 		}
