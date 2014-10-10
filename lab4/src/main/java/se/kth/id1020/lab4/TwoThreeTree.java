@@ -1,6 +1,6 @@
 package se.kth.id1020.lab4;
 
-public class twothreetree<K extends Comparable<K>, Value1, Value2> {
+public class TwoThreeTree<K extends Comparable<K>, Value1, Value2> {
 
 	private Node root;
 	private int countSplit = 0;
@@ -34,6 +34,11 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		}
 	}
 	
+	/***
+	 * Retrieves the value of the key stored in the tree. If the key is not in the tree a null value is returned.
+	 * @param key The key to find in the tree.
+	 * @return The value that's associated with the specified key, returns null if the key is not found.
+	 */
 	public ValuePair<Value1, Value2> get(K key)
 	{
 		Node searchResult = get(key, root);
