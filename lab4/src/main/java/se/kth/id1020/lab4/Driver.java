@@ -91,24 +91,41 @@ public class Driver {
 //		System.out.print("BS print: "+ tree.size());
 		
 		
-		
 		URL url = Driver.class.getResource("kap1.txt");
 		In input = new In(url);
 		while (!input.isEmpty())
 		{
 			String line = input.readLine().trim();
 			String[] words = line.split(" ");
+			int UniqueWords = 0;
+			
 			for (String word : words)
 			{
-				System.out.println(word);
+				String newWord = word.trim();
 				
+				ValuePair <Integer, Integer> treeValue = tree.get(newWord);
 				
-				tree.put(word.trim(), new ValuePair<Integer, Integer>(0,0));
+				if (treeValue != null)
+				{
+					tree.put(newWord, new ValuePair<Integer, Integer>(treeValue.x ,treeValue.y++));
+				}
+				else
+				{
+					//We've found a new word.
+					UniqueWords++;
+					tree.put(newWord, new ValuePair<Integer, Integer>(UniqueWords,0));
+				}
+				
+				tree.put(newWord, new ValuePair<Integer, Integer>(0,0));
 				// Run the program and scan the words
 				// First strip away extra characters from each word
 				// Then add the word into the search tree
+				
+				System.out.println(newWord);
 			}
 		}
+		
+		System.out.println(tree.size());
 	}
 
 }
