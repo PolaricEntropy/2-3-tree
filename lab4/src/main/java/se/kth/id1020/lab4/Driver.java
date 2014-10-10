@@ -9,17 +9,17 @@ public class Driver {
 	public static void main(String[] args) {
 		twothreetree<String, Integer, Integer> tree = new twothreetree<String, Integer, Integer>();
 		
-		tree.put("a", new ValuePair<Integer, Integer>(1, 20));
-		tree.put("b", new ValuePair<Integer, Integer>(2, 2440));
-		tree.put("c", new ValuePair<Integer, Integer>(3, 45));
-		tree.put("d", new ValuePair<Integer, Integer>(4, 31));
-		tree.put("e", new ValuePair<Integer, Integer>(5, 298));
-		tree.put("f", new ValuePair<Integer, Integer>(6, 7987));
-		tree.put("g", new ValuePair<Integer, Integer>(7, 7987));
-		tree.put("h", new ValuePair<Integer, Integer>(8, 7987));
-		tree.put("i", new ValuePair<Integer, Integer>(9, 7987));
-		tree.put("j", new ValuePair<Integer, Integer>(10, 7987));
-		tree.put("k", new ValuePair<Integer, Integer>(11, 7987));
+//		tree.put("a", new ValuePair<Integer, Integer>(1, 20));
+//		tree.put("b", new ValuePair<Integer, Integer>(2, 2440));
+//		tree.put("c", new ValuePair<Integer, Integer>(3, 45));
+//		tree.put("d", new ValuePair<Integer, Integer>(4, 31));
+//		tree.put("e", new ValuePair<Integer, Integer>(5, 298));
+//		tree.put("f", new ValuePair<Integer, Integer>(6, 7987));
+//		tree.put("g", new ValuePair<Integer, Integer>(7, 7987));
+//		tree.put("h", new ValuePair<Integer, Integer>(8, 7987));
+//		tree.put("i", new ValuePair<Integer, Integer>(9, 7987));
+//		tree.put("j", new ValuePair<Integer, Integer>(10, 7987));
+//		tree.put("k", new ValuePair<Integer, Integer>(11, 7987));
 //		tree.put("l", new ValuePair<Integer, Integer>(12, 7987));
 //		tree.put("m", new ValuePair<Integer, Integer>(13, 7987));
 //		tree.put("n", new ValuePair<Integer, Integer>(14, 7987));
@@ -70,28 +70,26 @@ public class Driver {
 //		System.out.print(tree.get("å").x + ", ");
 //		System.out.print(tree.get("ä").x + ", ");
 //		System.out.print(tree.get("ö").x + ", ");
-//		
-		
-		System.out.println("Kalle print: " + tree.kSize());
-		System.out.print("BS print: "+ tree.size());
+ 
+//		System.out.print("BS print: "+ tree.size());
 		
 		
 		
-//		URL url = Driver.class.getResource("kap1.txt");
-//		In input = new In(url);
-//		while (!input.isEmpty()) {
-//			String line = input.readLine().trim();
-//			String[] words = line.split(" ");
-//			for (String word : words) {
-//				System.out.println(word);
-//				
-//				
-//				tree.put(word.trim(), 0);
-//				// Run the program and scan the words
-//				// First strip away extra characters from each word
-//				// Then add the word into the search tree
-//			}
-//		}
+		URL url = Driver.class.getResource("kap1.txt");
+		In input = new In(url);
+		while (!input.isEmpty()) {
+			String line = input.readLine().trim();
+			String[] words = line.split(" ");
+			for (String word : words) {
+				System.out.println(word);
+				
+				
+				tree.put(word.trim(), new ValuePair<Integer, Integer>(0,0));
+				// Run the program and scan the words
+				// First strip away extra characters from each word
+				// Then add the word into the search tree
+			}
+		}
 	}
 
 }

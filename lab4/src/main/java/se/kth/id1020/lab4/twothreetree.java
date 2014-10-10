@@ -3,83 +3,34 @@ package se.kth.id1020.lab4;
 public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 
 	private Node root;
+	private int countSplit = 0;
 	
 	public class Node
 	{
 		protected KeyValuePair<K, Value1, Value2> keyvalues1;
 		protected KeyValuePair<K, Value1, Value2> keyvalues2;
 		protected Node parent, left, middle, right;
-		protected int N;
 		
-		public Node(KeyValuePair<K, Value1, Value2> keyValues1, int N)
+		public Node(KeyValuePair<K, Value1, Value2> keyValues1)
 		{
 			this.keyvalues1 = keyValues1;
-			this.N = N;
 		}
 		
-		public Node(KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2, int N)
+		public Node(KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2)
 		{
-			this(keyValues1, N);
+			this(keyValues1);
 			this.keyvalues2 = keyValues2;
 		} 
-		
-		public int kSize() {
-			return kSize(root);
-		}
-		
-		private int kSize(Node parent) {
-			int size = 0;
-			
-			if (parent.left != null) {
-				++size;
-				size += kSize(parent.left);
-			}
-			
-			if (parent.middle != null) {
-				++size;
-				size += kSize(parent.middle);
-			}
-			
-			if (parent.right != null) {
-				++size;
-				size += kSize(parent.right);
-			}
-			
-			return size;
-		}
-		
-		public void updateSize()
-		{
-			//Count this node.
-			N = 1;
-			
-			if(left != null)
-				N += left.N;
-				
-			if(middle != null)	
-				N += middle.N;
-				
-			if (right != null)	
-				N += right.N;
-				
-		}
 	}
 	public class FourNode extends Node
 	{
 		protected KeyValuePair<K, Value1, Value2> keyvalues3;
 		protected Node middle2;
 		
-		public FourNode (KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2, KeyValuePair<K, Value1, Value2> keyValues3, int N)
+		public FourNode (KeyValuePair<K, Value1, Value2> keyValues1, KeyValuePair<K, Value1, Value2> keyValues2, KeyValuePair<K, Value1, Value2> keyValues3)
 		{
-			super(keyValues1, keyValues2, N);
+			super(keyValues1, keyValues2);
 			this.keyvalues3 = keyValues3;
-		}
-		
-		public void updateSize()
-		{
-			super.updateSize();
-			
-			N += middle2.N;
 		}
 	}
 	
@@ -98,10 +49,6 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			return null;
 	}
 	
-	public int kSize() {
-		return root.kSize();
-	} 
-	
 	public void put(K key, ValuePair<Value1, Value2> value)
 	{
 		//Null values are not supported, cause then get will not work properly.
@@ -116,7 +63,8 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		if (root == null)
 		{
 			//Size of 1 since we just have one node.
-			root = new Node(new KeyValuePair<K, Value1, Value2>(key, value), 1);
+			root = new Node(new KeyValuePair<K, Value1, Value2>(key, value));
+			countSplit = 1;
 			return;
 		}
 		
@@ -163,15 +111,15 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			
 			//Key is less than left key, insert new value to the left. 
 			if (key.compareTo(foundNode.keyvalues1.key) <= -1)
-				tempFourNode = new FourNode(new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues1, foundNode.keyvalues2, 1);
+				tempFourNode = new FourNode(new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues1, foundNode.keyvalues2);
 			
 			//Key is larger then the left key, and smaller then the right key, thus it should go in the middle.
 			else if (key.compareTo(foundNode.keyvalues1.key) >= 1 && key.compareTo(foundNode.keyvalues2.key) <= -1)
-				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues2, 1);
+				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, Value1, Value2>(key, value), foundNode.keyvalues2);
 			
 			//Key is more then the right key, insert new value in the right.
 			else if (key.compareTo(foundNode.keyvalues2.key) >= 1)
-				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, Value1, Value2>(key, value), 1);
+				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, Value1, Value2>(key, value));
 			
 			put4NodeInNode(foundNode, tempFourNode);
 		}
@@ -180,15 +128,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 	public int size()
 	{
-		return size(root);
-	}
-	
-	private int size(Node x)
-	{
-		if (x == null)
-			return 0;
-		else
-			return x.N;
+		return countSplit;
 	}
 	
 	public Iterable<K> keys()
@@ -290,11 +230,12 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 	
 		//Split the FourNode into a TwoNode.	
 		Node splitResult = Convert4to2(tmpFourNode);
+		countSplit++;
 		
 		if (currentNode == root)
 		{
 			root = splitResult;
-			root.N ++;
+			countSplit++;
 		}
 			
 		else
@@ -328,12 +269,12 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 		//   	/	\	/   \
 		//     /	 \ /     \
 		
-		//Create a new root node, b, from the middle keyvalue.
-		Node newRoot = new Node (inNode.keyvalues2, inNode.N +1);
+		//Create a new root node, b, from the middle keyvalue. 
+		Node newRoot = new Node (inNode.keyvalues2);
 		
 		//New left, a, is the left child. New right, c, is the right child.
-		Node newLeft = new Node (inNode.keyvalues1, inNode.N);
-		Node newRight = new Node (inNode.keyvalues3, inNode.N);
+		Node newLeft = new Node (inNode.keyvalues1);
+		Node newRight = new Node (inNode.keyvalues3);
 		
 		//Get the two left most children to the newLeft node.
 		newLeft.parent = newRoot;
@@ -400,21 +341,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			//Don't forget to relink the parent property.
 			separateNode.middle.parent = treeNode;
 			separateNode.left.parent = treeNode;
-			
-			//Update our own size.
-			treeNode.updateSize();
-			//treeNode.N = (separateNode.N) + (separateNode.middle.N);
-			
-			//Start updating our parents sizes.
-			Node curNode = treeNode.parent;
-			
-			while (curNode != null)
-			{
-				//Recount as we have updated the number of children.
-				treeNode.updateSize();
-				curNode = curNode.parent;
-			}
-			
+									
 			return null;
 		}
 		else //If the node in the tree we are merging with is a three node.
@@ -425,7 +352,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) <= -1)
 			{
 				
-				tmpFourNode = new FourNode(separateNode.keyvalues1, treeNode.keyvalues1, treeNode.keyvalues2, 1);
+				tmpFourNode = new FourNode(separateNode.keyvalues1, treeNode.keyvalues1, treeNode.keyvalues2);
 				
 				tmpFourNode.left = separateNode.left;
 				tmpFourNode.middle = separateNode.right;
@@ -434,7 +361,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			}
 			else if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) >= 1 && separateNode.keyvalues1.key.compareTo(treeNode.keyvalues2.key) <= -1)
 			{
-				tmpFourNode = new FourNode(treeNode.keyvalues1, separateNode.keyvalues1, treeNode.keyvalues2, 1);
+				tmpFourNode = new FourNode(treeNode.keyvalues1, separateNode.keyvalues1, treeNode.keyvalues2);
 				
 				tmpFourNode.left = treeNode.left;
 				tmpFourNode.middle = separateNode.left;
@@ -443,7 +370,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			}
 			else //If not smaller or in the middle of our values it must be bigger.
 			{
-				tmpFourNode = new FourNode(treeNode.keyvalues1, treeNode.keyvalues2, separateNode.keyvalues1, 1);
+				tmpFourNode = new FourNode(treeNode.keyvalues1, treeNode.keyvalues2, separateNode.keyvalues1);
 				
 				tmpFourNode.left = treeNode.left;
 				tmpFourNode.middle = treeNode.middle;
@@ -455,10 +382,7 @@ public class twothreetree<K extends Comparable<K>, Value1, Value2> {
 			tmpFourNode.left.parent = tmpFourNode;
 			tmpFourNode.middle.parent = tmpFourNode;
 			tmpFourNode.middle2.parent = tmpFourNode;
-			tmpFourNode.right.parent = tmpFourNode;
-			
-			tmpFourNode.updateSize();
-			
+			tmpFourNode.right.parent = tmpFourNode;			
 			
 			return tmpFourNode;
 		}
