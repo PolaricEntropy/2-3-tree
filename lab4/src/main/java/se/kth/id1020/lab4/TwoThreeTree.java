@@ -2,7 +2,7 @@ package se.kth.id1020.lab4;
 
 import java.util.Iterator;
 
-public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
+public class TwoThreeTree<K extends Comparable<K>, V> {
 
 	private Node root;
 	private int splitCount = 0; //We are only creating new nodes when splitting (with a few exceptions). Just count the splits and we get the size.
@@ -143,16 +143,14 @@ public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
 		return splitCount;
 	}
 	
-	//No time to implement now.
-	public Iterable<K> keys()
+	public Iterator<KeyValuePair<K, V>> keys()
 	{
-		throw new UnsupportedOperationException();
+		return new TwoThreeTreeIterator();
 	}
 	
-	//No time to implement now.
-	public Iterable<K> keys(K lo, K hi)
+	public Iterator<KeyValuePair<K, V>> keys(K lo, K hi)
 	{
-		throw new UnsupportedOperationException();
+		return new TwoThreeTreeIterator(lo, hi);
 	}
 	
 	/**
@@ -266,7 +264,7 @@ public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
 				return startNode;
 		}
 		
-		//If smaller than the first value, this is the same for both TwoNodes and ThreeNodes. 
+		//If smaller than the first value search left, this is the same for both TwoNodes and ThreeNodes. 
 		if (key.compareTo(startNode.keyvalues1.key) < 0)
 			return getNode(key, startNode.left, returnNullOnMissing);
 		
@@ -276,8 +274,8 @@ public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
 			//If equal to our value.
 			if (key.equals(startNode.keyvalues1.key))
 				return startNode;
-			else //If not equal then it must be greater than, since we've done the lesser than comparison already.
-				return getNode(key, startNode.middle, returnNullOnMissing);
+			else //Must be greater than, search middle cause that's the right child in two nodes.
+				return getNode(key, startNode.middle, returnNullOnMissing); //Middle is right child for TwoNodes.
 		}
 		else //ThreeNode
 		{
@@ -285,10 +283,10 @@ public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
 			if (key.equals(startNode.keyvalues1.key) || key.equals(startNode.keyvalues2.key))
 				return startNode;
 			
-			//If in the middle.
+			//If in the middle, search middle child.
 			if (key.compareTo(startNode.keyvalues1.key) > 0 && key.compareTo(startNode.keyvalues2.key) < 0)
 				return getNode(key, startNode.middle, returnNullOnMissing);
-			else //If greater than our second value.
+			else //If greater than our second value, search right.
 				return getNode(key, startNode.right, returnNullOnMissing);
 		}	
 	}
@@ -456,24 +454,41 @@ public class TwoThreeTree<K extends Comparable<K>, V> {//implements Iterable<K>{
 		
 	}
 	
-//	public Iterator<K> iterator() {
-//		return new this.TwoThreeTreeIterator<K>();
-//	}
-//	
-//	
-//	public class TwoThreeTreeIterator <Ke extends Comparable<K>> implements Iterator<Ke> {
-//
-//		public boolean hasNext() {
-//			// TODO Auto-generated method stub
-//			return false;
-//		}
-//
-//		public K next() {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-//
-//	}
+	public class TwoThreeTreeIterator implements Iterator<KeyValuePair<K, V>> {
 
+		Node current;
+		Node stopNode;
+		
+		K low, high;
+		
+		public TwoThreeTreeIterator()
+		{
+			//TODO: find smallest and largest.
+		}
+		
+		public TwoThreeTreeIterator(K low, K high)
+		{
+			//Search from the root for the startNode and stopNode. 
+			current = getNode(low, root, false);
+			stopNode = getNode(high, root, false);
+		}
+		
+		public boolean hasNext() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		public KeyValuePair<K, V> next() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		public void traverse(Node curNode)
+		{
+			if (curNode == null)
+				return;
+		}
+
+	}
 	
 }
