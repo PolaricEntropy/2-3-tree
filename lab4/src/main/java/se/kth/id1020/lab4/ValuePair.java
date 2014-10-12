@@ -1,21 +1,32 @@
 package se.kth.id1020.lab4;
 
-public class ValuePair <V1, V2 extends Comparable<V2>> implements Comparable<ValuePair<V1, V2>> {
+public class ValuePair implements Comparable<ValuePair> {
 	
-	public V1 occuranceNumber;
-	public V2 occuranceCount;
+	public Integer occuranceNumber;
+	public Integer occuranceCount;
 	
-	public ValuePair(V1 value1, V2 value2)
+	public ValuePair(Integer value1, Integer value2)
 	{
 		this.occuranceNumber = value1;
 		this.occuranceCount = value2;
 	}
 
-	public int compareTo(ValuePair<V1, V2> o)
+	/**
+	 * Used to compare keys when ValuePair is used as a key.
+	 */
+	public int compareTo(ValuePair o)
 	{
-		//Compare occurrence count so we can sort the tree by most occurring word.
-		return this.occuranceCount.compareTo(o.occuranceCount);
+		return this.occuranceNumber.compareTo(o.occuranceNumber);
 	}
 
+	/**
+	 * Used to compare keys when ValuePair is used as a key.
+	 * @param obj ValuePair to compare against.
+	 * @return
+	 */
+	public boolean equals(ValuePair obj)
+	{
+		return this.occuranceNumber.equals(obj.occuranceNumber);
+	}
 	
 }

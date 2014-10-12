@@ -1,6 +1,9 @@
 package se.kth.id1020.lab4;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TwoThreeTree <K extends Comparable<K>, V> {
 
@@ -143,15 +146,23 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		return splitCount;
 	}
 	
-	public Iterator<KeyValuePair<K, V>> keys()
+	public Iterable<KeyValuePair<K, V>> keys()
 	{
-		return new TwoThreeTreeIterator();
+		LinkedList<KeyValuePair<K, V>> results = new LinkedList<KeyValuePair<K, V>>();
+		
+		//Traverse the tree in-order and add each keyValue to the LinkedList. 
+		traverseTree(root, results);
+
+		//Sort by occurrence count. 
+//		Collections.sort(results, new compareByOccuranceCount());
+		
+		return results;
 	}
 	
-	public Iterator<KeyValuePair<K, V>> keys(K lo, K hi)
-	{
-		return new TwoThreeTreeIterator(lo, hi);
-	}
+//	public Iterator<KeyValuePair<K, V>> keys(K lo, K hi)
+//	{
+//		return new TwoThreeTreeIterator(lo, hi);
+//	}
 	
 	/**
 	 * Returns the depth of the entire tree, since it's a balanced tree the depth is the same in the entire tree.
@@ -176,16 +187,54 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 	}
 	
 	/**
-	 * Returns the number of elements we can add to the tree before our depth changes.
+	 * Returns the maximum number of elements we can add to the tree before our depth changes.
 	 * @return Returns the remaining elements we can add before our tree grows in depth.
 	 */
-	public int howMuchMore()
+	public int howMuchMoreMax()
 	{
-		//Get the number of nodes for root. Number of TwoNodes is in index 0.
+		//Get the number of different nodes for root. Number of TwoNodes is in index 0, ThreeNodes is index 1.
 		int[] totalRes = CountNodeTypes(root);
 		
-		//We can add TwoNodeCount + 1 keys before we increase depth.
-		return totalRes[0] +1;
+		//Get the depth once.
+		int depth = depth();
+		int numElementsAfterDepthChange = 0;
+		
+		//The minimum number of elements after the depth change to our current depth.
+		//2^(depth) + 2^(depth -1) + 2^(depth -2) + ...
+		//Geometric sum.
+		for (int n = depth; n >= 0; n--)
+			numElementsAfterDepthChange += Math.pow(2, (depth - n));
+		
+		//2*3^depth is the maximum of elements in the tree, if all nodes are ThreeNodes.
+		//The second term is the minimum number of elements (when all nodes are TwoNodes) after a depth change.
+		//Subtract the number of elements in the tree.
+		Double result = 2 * Math.pow(3, depth) + numElementsAfterDepthChange - (2 * totalRes[1] + totalRes[0]); 
+		
+		return result.intValue();
+	}
+	
+	public int howMuchMoreMin()
+	{
+		//Get the number of different nodes for root. Number of TwoNodes is in index 0, ThreeNodes is index 1.
+		int[] totalRes = CountNodeTypes(root);
+		
+		//Get the depth once.
+		int depth = depth();
+		int numElementsAfterDepthChange = 0;
+		
+		//The minimum number of elements after the depth change to our current depth.
+		//2^(depth) + 2^(depth -1) + 2^(depth -2) + ...
+		//Geometric sum.
+		for (int n = depth; n >= 0; n--)
+			numElementsAfterDepthChange += Math.pow(2, (depth - n));
+		
+		//If you only increase one branch of the tree you will need two elements to convert the parent to a ThreeNode,
+		//hence it takes 2^2 to convert their parent and then 2^3 to convert the grandparent and so on. That results in 2^(depth+1).
+		//The second term is the minimum number of elements (when all nodes are TwoNodes) after a depth change.
+		//Subtract the number of elements in the tree.
+		Double result = Math.pow(2, depth+1) + numElementsAfterDepthChange - (2 * totalRes[1] + totalRes[0]); 
+		
+		return result.intValue();
 	}
 	
 	/**
@@ -374,6 +423,40 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		
 		return newRoot;
 	}
+
+	private void traverseTree (Node curNode, List<KeyValuePair<K, V>> treeItems)
+	{
+		//If leaf node.
+		if (curNode.left == null)
+		{
+			//Add first value.
+			treeItems.add(curNode.keyvalues1);
+			
+			//If leaf is ThreeNode, then add second value.
+			if (curNode.keyvalues2 != null)
+				treeItems.add(curNode.keyvalues2);
+		}
+		else if (curNode.keyvalues2 == null) //If TwoNode.
+		{
+			traverseTree(curNode.left, treeItems);
+			
+			treeItems.add(curNode.keyvalues1);
+			
+			traverseTree(curNode.middle, treeItems);
+		}
+		else //If ThreeNode.
+		{
+			traverseTree(curNode.left, treeItems);
+			
+			treeItems.add(curNode.keyvalues1);
+			
+			traverseTree(curNode.middle, treeItems);
+			
+			treeItems.add(curNode.keyvalues2);
+			
+			traverseTree(curNode.right, treeItems);
+		}
+	}
 	
 	private FourNode MergeNodes(Node treeNode, Node separateNode)
 	{		
@@ -455,62 +538,63 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		
 	}
 	
-	public class TwoThreeTreeIterator implements Iterator<KeyValuePair<K, V>> {
-
-		Node current, next, stopNode;
-		
-		K low, high;
-		
-		public TwoThreeTreeIterator()
-		{
-			//TODO: find smallest and largest.
-		}
-		
-		public TwoThreeTreeIterator(K low, K high)
-		{
-			//Search from the root for the next and stopNode. 
-			next = getNode(low, root, false);
-			stopNode = getNode(high, root, false);
-		}
-		
-		public boolean hasNext()
-		{
-			if  (next == null)
-				return false;
-			else
-				return true;
-		}
-
-		public KeyValuePair<K, V> next() {
-			
-			//When we start current is null, and next is our first value. After that our new current is our previous next value, get that and calulate the next value.
-			current = next;
-			
-			//Check if we've already returned the last value in the tree, since then current variable will be null. This happens if we continue to iterate even though hasNext == false. 
-			if (current != null)
-			{
-				next = findNext();
-				
-				//TODO: Check what value to return, keyValue1 or keyValue2.
-			}
-			else
-				return null;
-			
-		}
-		
-		public Node findNext()
-		{
-			//We can now assume that current != null.
-			
-			//If left is null we are at a leaf node and we don't have any children. Then this node contains the next element.
-			if (current.left == null)
-			{
-				
-			}
-				
-			
-		}
-
-	}
+//	public class TwoThreeTreeIterator implements Iterator<KeyValuePair<K, V>> {
+//
+//		Node current, next, stopNode;
+//		
+//		K low, high;
+//		
+//		public TwoThreeTreeIterator()
+//		{
+//			//TODO: find smallest and largest.
+//		}
+//		
+//		public TwoThreeTreeIterator(K low, K high)
+//		{
+//			//Search from the root for the next and stopNode. 
+//			next = getNode(low, root, false);
+//			stopNode = getNode(high, root, false);
+//		}
+//		
+//		public boolean hasNext()
+//		{
+//			if  (next == null)
+//				return false;
+//			else
+//				return true;
+//		}
+//
+//		public KeyValuePair<K, V> next() {
+//			
+//			//When we start current is null, and next is our first value. After that our new current is our previous next value, get that and calulate the next value.
+//			current = next;
+//			
+//			//Check if we've already returned the last value in the tree, since then current variable will be null. This happens if we continue to iterate even though hasNext == false. 
+//			if (current != null)
+//			{
+//				next = findNext();
+//				
+//				//TODO: Check what value to return, keyValue1 or keyValue2.
+//			}
+//			else
+//				return null;
+//		
+//			return null;
+//		}
+//		
+//		public Node findNext()
+//		{
+//			//We can now assume that current != null.
+//			
+//			//If left is null we are at a leaf node and we don't have any children. Then this node contains the next element.
+//			if (current.left == null)
+//			{
+//				
+//			}
+//				
+//			return null;
+//		}
+//
+//	}
 	
 }

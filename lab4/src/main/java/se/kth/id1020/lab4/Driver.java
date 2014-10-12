@@ -8,18 +8,19 @@ import java.util.Iterator;
 public class Driver {
 
 	public static void main(String[] args) {
-		TwoThreeTree<String, ValuePair<Integer, Integer>> tree = new TwoThreeTree<String, ValuePair<Integer, Integer>>();
+		TwoThreeTree<String, ValuePair> tree = new TwoThreeTree<String, ValuePair>();
 		
 		addAZ(tree);
 		//addZA(tree);
-		//addText(tree, true);
-		getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
-		swapTree(tree); //Rebuild the tree so keys are the x,y valuePair and the value is the word.
+		//addText(tree);
+		//getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
+		//swapTree(tree); //Create a new tree so keys are the x,y valuePair and the value is the word.
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
 		System.out.println("Density: " + tree.density());
-		System.out.println("# Elements we can add before increased depth: " + tree.howMuchMore());	
+		System.out.println("Minimum number of elements we can add before depth changes: " + tree.howMuchMoreMin());
+		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMoreMax());
 		
 	}
 
@@ -38,7 +39,7 @@ public class Driver {
 		return in;
 	}
 	
-	private static void addText(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
+	private static void addText(TwoThreeTree<String, ValuePair> tree)
 	{
 		URL url = Driver.class.getResource("kap1.txt");
 		In input = new In(url);
@@ -52,15 +53,19 @@ public class Driver {
 			{
 				String newWord = CleanWord(word);
 			
-				ValuePair <Integer, Integer> treeValue = tree.get(newWord);
+				//Skip adding spaces.
+				if (newWord.equals(""))
+					continue;
+				
+				ValuePair treeValue = tree.get(newWord);
 				
 				if (treeValue != null)
-					tree.put(newWord, new ValuePair<Integer, Integer>(treeValue.occuranceNumber ,treeValue.occuranceCount++));
+					tree.put(newWord, new ValuePair(treeValue.occuranceNumber, ++treeValue.occuranceCount));
 				else
 				{
 					//We've found a new word.
 					UniqueWords++;
-					tree.put(newWord, new ValuePair<Integer, Integer>(UniqueWords,0));
+					tree.put(newWord, new ValuePair(UniqueWords,1));
 				}
 				
 				System.out.println(newWord);
@@ -68,102 +73,100 @@ public class Driver {
 		}
 	}
 	
-	private static void swapTree(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
+	private static void swapTree(TwoThreeTree<String, ValuePair> tree)
 	{
-		TwoThreeTree<ValuePair<Integer, Integer>, String> swappedTree = new TwoThreeTree<ValuePair<Integer, Integer>, String>();
+		TwoThreeTree<ValuePair, String> swappedTree = new TwoThreeTree<ValuePair, String>();
 		
-		//Iterator for the first tree.
-		Iterator<KeyValuePair<String, ValuePair<Integer, Integer>>> firstTreeIterator = tree.keys();
+		//Iterate through the first tree, adding all key/values from that one to our second swapped tree.
+		for (KeyValuePair<String, ValuePair> keyValues : tree.keys())
+			swappedTree.put(keyValues.value, keyValues.key);
 		
-		//Iterate throught the first tree, adding all key/values from that one to our second swapped tree.
-		while (firstTreeIterator.hasNext())
-		{
-			KeyValuePair<String, ValuePair<Integer, Integer>> keyvalue = firstTreeIterator.next();
-			swappedTree.put(keyvalue.value, keyvalue.key);
-		}
-		
-		Iterator<KeyValuePair<String, ValuePair<Integer, Integer>>> secondTreeIterator = tree.keys();
 		int printedValues = 0;
 		
-		//Print the first 10 values.
-		while (secondTreeIterator != null && printedValues < 10)
+		for (KeyValuePair<ValuePair, String> keyValues : swappedTree.keys())
 		{
-			System.out.println();
+			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.value, keyValues.key.occuranceCount));
 			printedValues++;
+			
+			if (printedValues == 10)
+				break;
 		}
 		
 	}
 	
-	private static void getMostOccuringWordsWithIterator(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
-	{
-		Iterator<KeyValuePair<String, ValuePair<Integer, Integer>>> iter = tree.keys("a", "g");
+	private static void getMostOccuringWordsWithIterator(TwoThreeTree<String, ValuePair> tree)
+	{		
 		int printedValues = 0;
 		
-		while (iter.hasNext() && printedValues < 10)
+		for (KeyValuePair<String, ValuePair> keyValues : tree.keys())
 		{
-			System.out.println(iter.next());
+			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.key, keyValues.value.occuranceCount));
 			printedValues++;
-		}	
+			
+			if (printedValues == 10)
+				break;
+		}
+			
 	}
 	
-	private static void addAZ(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
+	private static void addAZ(TwoThreeTree<String, ValuePair> tree)
 	{
-		tree.put("a", new ValuePair<Integer, Integer>(1, 20));
-		tree.put("b", new ValuePair<Integer, Integer>(2, 2440));
-		tree.put("c", new ValuePair<Integer, Integer>(3, 45));
-		tree.put("d", new ValuePair<Integer, Integer>(4, 31));
-		tree.put("e", new ValuePair<Integer, Integer>(5, 298));
-		tree.put("f", new ValuePair<Integer, Integer>(6, 7987));
-		tree.put("g", new ValuePair<Integer, Integer>(7, 7987));
-//		tree.put("h", new ValuePair<Integer, Integer>(8, 7987));
-//		tree.put("i", new ValuePair<Integer, Integer>(9, 7987));
-//		tree.put("j", new ValuePair<Integer, Integer>(10, 7987));
-//		tree.put("k", new ValuePair<Integer, Integer>(11, 7987));
-//		tree.put("l", new ValuePair<Integer, Integer>(12, 7987));
-//		tree.put("m", new ValuePair<Integer, Integer>(13, 7987));
-//		tree.put("n", new ValuePair<Integer, Integer>(14, 7987));
-//		tree.put("o", new ValuePair<Integer, Integer>(15, 7987));
-//		tree.put("p", new ValuePair<Integer, Integer>(16, 7987));
-//		tree.put("q", new ValuePair<Integer, Integer>(17, 7987));
-//		tree.put("r", new ValuePair<Integer, Integer>(18, 7987));
-//		tree.put("s", new ValuePair<Integer, Integer>(19, 7987));
-//		tree.put("t", new ValuePair<Integer, Integer>(20, 7987));
-//		tree.put("u", new ValuePair<Integer, Integer>(21, 7987));
-//		tree.put("v", new ValuePair<Integer, Integer>(22, 7987));
-//		tree.put("w", new ValuePair<Integer, Integer>(23, 7987));
-//		tree.put("x", new ValuePair<Integer, Integer>(24, 7987));
-//		tree.put("y", new ValuePair<Integer, Integer>(25, 7987));
-//		tree.put("z", new ValuePair<Integer, Integer>(26, 7987));
+		tree.put("a", new ValuePair(1, 20));
+		tree.put("b", new ValuePair(2, 2440));
+		tree.put("c", new ValuePair(3, 45));
+		tree.put("d", new ValuePair(4, 31));
+		tree.put("e", new ValuePair(5, 298));
+		tree.put("f", new ValuePair(6, 7987));
+		tree.put("g", new ValuePair(7, 7987));
+		tree.put("h", new ValuePair(8, 7987));
+		tree.put("i", new ValuePair(9, 7987));
+		tree.put("j", new ValuePair(10, 7987));
+		tree.put("k", new ValuePair(11, 7987));
+		tree.put("l", new ValuePair(12, 7987));
+		tree.put("m", new ValuePair(13, 7987));
+		tree.put("n", new ValuePair(14, 7987));
+		tree.put("o", new ValuePair(15, 7987));
+//		tree.put("p", new ValuePair(16, 7987));
+//		tree.put("q", new ValuePair(17, 7987));
+//		tree.put("r", new ValuePair(18, 7987));
+//		tree.put("s", new ValuePair(19, 7987));
+//		tree.put("t", new ValuePair(20, 7987));
+//		tree.put("u", new ValuePair(21, 7987));
+//		tree.put("v", new ValuePair(22, 7987));
+//		tree.put("w", new ValuePair(23, 7987));
+//		tree.put("x", new ValuePair(24, 7987));
+//		tree.put("y", new ValuePair(25, 7987));
+//		tree.put("z", new ValuePair(26, 7987));
 	}
 
-	private static void addZA(TwoThreeTree<String, ValuePair<Integer, Integer>> tree){
-		tree.put("z", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("y", new ValuePair<Integer, Integer>(30, 7987));
-		tree.put("x", new ValuePair<Integer, Integer>(31, 7987));
-		tree.put("w", new ValuePair<Integer, Integer>(32, 7987));
-		tree.put("v", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("u", new ValuePair<Integer, Integer>(30, 7987));
-		tree.put("t", new ValuePair<Integer, Integer>(31, 7987));
-		tree.put("s", new ValuePair<Integer, Integer>(32, 7987));
-		tree.put("r", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("q", new ValuePair<Integer, Integer>(30, 7987));
-		tree.put("p", new ValuePair<Integer, Integer>(31, 7987));
-		tree.put("o", new ValuePair<Integer, Integer>(32, 7987));
-		tree.put("n", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("m", new ValuePair<Integer, Integer>(30, 7987));
-		tree.put("l", new ValuePair<Integer, Integer>(31, 7987));
-		tree.put("k", new ValuePair<Integer, Integer>(32, 7987));
-		tree.put("j", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("i", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("h", new ValuePair<Integer, Integer>(30, 7987));
-		tree.put("g", new ValuePair<Integer, Integer>(31, 7987));
-		tree.put("f", new ValuePair<Integer, Integer>(32, 7987));
-		tree.put("e", new ValuePair<Integer, Integer>(33, 7987));
-		tree.put("d", new ValuePair<Integer, Integer>(30, 7987));
-		tree.put("c", new ValuePair<Integer, Integer>(31, 7987));
-		tree.put("b", new ValuePair<Integer, Integer>(32, 7987));
-		tree.put("a", new ValuePair<Integer, Integer>(33, 7987));
-	}
+//	private static void addZA(TwoThreeTree<String, ValuePair<Integer, Integer>> tree){
+//		tree.put("z", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("y", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("x", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("w", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("v", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("u", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("t", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("s", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("r", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("q", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("p", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("o", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("n", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("m", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("l", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("k", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("j", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("i", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("h", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("g", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("f", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("e", new ValuePair<Integer, Integer>(33, 7987));
+//		tree.put("d", new ValuePair<Integer, Integer>(30, 7987));
+//		tree.put("c", new ValuePair<Integer, Integer>(31, 7987));
+//		tree.put("b", new ValuePair<Integer, Integer>(32, 7987));
+//		tree.put("a", new ValuePair<Integer, Integer>(33, 7987));
+//	}
 	
 	private static void printAZ (){
 //		System.out.print(tree.get("a").x + ", ");
