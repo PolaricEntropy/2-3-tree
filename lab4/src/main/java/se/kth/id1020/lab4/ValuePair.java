@@ -24,8 +24,10 @@ public class ValuePair implements Comparable<ValuePair> {
 	 * @param obj ValuePair to compare against.
 	 * @return
 	 */
-	public boolean equals(ValuePair obj)
+	public boolean equals(Object o)
 	{
+		ValuePair obj = (ValuePair) o;
+		
 		return this.occuranceNumber.equals(obj.occuranceNumber);
 	}
 	
