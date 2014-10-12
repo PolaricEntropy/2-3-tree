@@ -9,12 +9,12 @@ public class Driver {
 
 	public static void main(String[] args) {
 		TwoThreeTree<String, ValuePair<Integer, Integer>> tree = new TwoThreeTree<String, ValuePair<Integer, Integer>>();
-
+		
 		addAZ(tree);
 		//addZA(tree);
-		//addText(tree);
-		
-		GetElementsWithIterator(tree);
+		//addText(tree, true);
+		getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
+		swapTree(tree); //Rebuild the tree so keys are the x,y valuePair and the value is the word.
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
@@ -46,16 +46,16 @@ public class Driver {
 		{
 			String line = input.readLine().trim();
 			String[] words = line.split(" ");
-			int UniqueWords = 0;
+			int UniqueWords = 1;
 			
 			for (String word : words)
 			{
 				String newWord = CleanWord(word);
-				
+			
 				ValuePair <Integer, Integer> treeValue = tree.get(newWord);
 				
 				if (treeValue != null)
-					tree.put(newWord, new ValuePair<Integer, Integer>(treeValue.x ,treeValue.y++));
+					tree.put(newWord, new ValuePair<Integer, Integer>(treeValue.occuranceNumber ,treeValue.occuranceCount++));
 				else
 				{
 					//We've found a new word.
@@ -63,22 +63,46 @@ public class Driver {
 					tree.put(newWord, new ValuePair<Integer, Integer>(UniqueWords,0));
 				}
 				
-				// Run the program and scan the words
-				// First strip away extra characters from each word
-				// Then add the word into the search tree
-				
 				System.out.println(newWord);
 			}
 		}
 	}
 	
-	private static void GetElementsWithIterator(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
+	private static void swapTree(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
+	{
+		TwoThreeTree<ValuePair<Integer, Integer>, String> swappedTree = new TwoThreeTree<ValuePair<Integer, Integer>, String>();
+		
+		//Iterator for the first tree.
+		Iterator<KeyValuePair<String, ValuePair<Integer, Integer>>> firstTreeIterator = tree.keys();
+		
+		//Iterate throught the first tree, adding all key/values from that one to our second swapped tree.
+		while (firstTreeIterator.hasNext())
+		{
+			KeyValuePair<String, ValuePair<Integer, Integer>> keyvalue = firstTreeIterator.next();
+			swappedTree.put(keyvalue.value, keyvalue.key);
+		}
+		
+		Iterator<KeyValuePair<String, ValuePair<Integer, Integer>>> secondTreeIterator = tree.keys();
+		int printedValues = 0;
+		
+		//Print the first 10 values.
+		while (secondTreeIterator != null && printedValues < 10)
+		{
+			System.out.println();
+			printedValues++;
+		}
+		
+	}
+	
+	private static void getMostOccuringWordsWithIterator(TwoThreeTree<String, ValuePair<Integer, Integer>> tree)
 	{
 		Iterator<KeyValuePair<String, ValuePair<Integer, Integer>>> iter = tree.keys("a", "g");
+		int printedValues = 0;
 		
-		while (iter.hasNext())
+		while (iter.hasNext() && printedValues < 10)
 		{
 			System.out.println(iter.next());
+			printedValues++;
 		}	
 	}
 	

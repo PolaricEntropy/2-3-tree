@@ -2,7 +2,7 @@ package se.kth.id1020.lab4;
 
 import java.util.Iterator;
 
-public class TwoThreeTree<K extends Comparable<K>, V> {
+public class TwoThreeTree <K extends Comparable<K>, V> {
 
 	private Node root;
 	private int splitCount = 0; //We are only creating new nodes when splitting (with a few exceptions). Just count the splits and we get the size.
@@ -325,7 +325,7 @@ public class TwoThreeTree<K extends Comparable<K>, V> {
 		//		(a, b, c)
 		//		/  |  |	 \
 		//	   /   |  |	  \
-		//
+		//    1    2  3    4
 		//
 		//			 (b)
 		//			/   \
@@ -333,6 +333,7 @@ public class TwoThreeTree<K extends Comparable<K>, V> {
 		//	 	 (a)     (c)
 		//   	/	\	/   \
 		//     /	 \ /     \
+		//    1      2 3     4
 		
 		//Create a new root node, b, from the middle keyvalue. 
 		Node newRoot = new Node (inNode.keyvalues2);
@@ -456,8 +457,7 @@ public class TwoThreeTree<K extends Comparable<K>, V> {
 	
 	public class TwoThreeTreeIterator implements Iterator<KeyValuePair<K, V>> {
 
-		Node current;
-		Node stopNode;
+		Node current, next, stopNode;
 		
 		K low, high;
 		
@@ -468,25 +468,47 @@ public class TwoThreeTree<K extends Comparable<K>, V> {
 		
 		public TwoThreeTreeIterator(K low, K high)
 		{
-			//Search from the root for the startNode and stopNode. 
-			current = getNode(low, root, false);
+			//Search from the root for the next and stopNode. 
+			next = getNode(low, root, false);
 			stopNode = getNode(high, root, false);
 		}
 		
-		public boolean hasNext() {
-			// TODO Auto-generated method stub
-			return false;
+		public boolean hasNext()
+		{
+			if  (next == null)
+				return false;
+			else
+				return true;
 		}
 
 		public KeyValuePair<K, V> next() {
-			// TODO Auto-generated method stub
-			return null;
+			
+			//When we start current is null, and next is our first value. After that our new current is our previous next value, get that and calulate the next value.
+			current = next;
+			
+			//Check if we've already returned the last value in the tree, since then current variable will be null. This happens if we continue to iterate even though hasNext == false. 
+			if (current != null)
+			{
+				next = findNext();
+				
+				//TODO: Check what value to return, keyValue1 or keyValue2.
+			}
+			else
+				return null;
+			
 		}
 		
-		public void traverse(Node curNode)
+		public Node findNext()
 		{
-			if (curNode == null)
-				return;
+			//We can now assume that current != null.
+			
+			//If left is null we are at a leaf node and we don't have any children. Then this node contains the next element.
+			if (current.left == null)
+			{
+				
+			}
+				
+			
 		}
 
 	}
