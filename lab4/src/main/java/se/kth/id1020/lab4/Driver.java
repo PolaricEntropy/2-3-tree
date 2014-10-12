@@ -11,11 +11,9 @@ public class Driver {
 	public static void main(String[] args) {
 		TwoThreeTree<String, ValuePair> tree = new TwoThreeTree<String, ValuePair>();
 		
-		//addAZ(tree);
-		//addZA(tree);
 		addText(tree);
 		getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
-		swapTree(tree); //Create a new tree so keys are the x,y valuePair and the value is the word.
+		swapTree(tree); //Create a new tree so keys are the valuePair and the value is the word.
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
@@ -23,7 +21,11 @@ public class Driver {
 		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMoreMax());	
 	}
 
-	
+	/**
+	 * Clean up the word before we add it to the tree.
+	 * @param in The word to clean.
+	 * @return The cleaned word.
+	 */
 	private static String CleanWord(String in)
 	{
 		//Remove .,:;". 
@@ -38,6 +40,10 @@ public class Driver {
 		return in;
 	}
 	
+	/**
+	 * Add the text to the tree.
+	 * @param tree The tree to add text to.
+	 */
 	private static void addText(TwoThreeTree<String, ValuePair> tree)
 	{
 		URL url = Driver.class.getResource("kap1.txt");
@@ -72,6 +78,10 @@ public class Driver {
 		}
 	}
 	
+	/**
+	 * Creates a new tree that has key, values swapped. Also sorts it by occurrence count and prints the 10 most occurring words.
+	 * @param tree The initial tree to swap.
+	 */
 	private static void swapTree(TwoThreeTree<String, ValuePair> tree)
 	{
 		TwoThreeTree<ValuePair, String> swappedTree = new TwoThreeTree<ValuePair, String>();
@@ -85,8 +95,9 @@ public class Driver {
 		LinkedList<TwoThreeTree<ValuePair, String>.KeyValuePair> keyValuesinTree = (LinkedList<TwoThreeTree<ValuePair, String>.KeyValuePair>)swappedTree.keys();
 		
 		//Sort by occurrence count. 
-		Collections.sort(keyValuesinTree, new compareByOccuranceCount2());
+		Collections.sort(keyValuesinTree, new compareByOccuranceCountSwapped());
 		
+		//Print the first 10 values, the 10 words that's most occuring.
 		for (TwoThreeTree<ValuePair, String>.KeyValuePair keyValues : keyValuesinTree)
 		{
 			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.value, keyValues.key.occuranceCount));
@@ -98,6 +109,10 @@ public class Driver {
 		
 	}
 	
+	/**
+	 * Print the 10 most occurring words.
+	 * @param tree
+	 */
 	private static void getMostOccuringWordsWithIterator(TwoThreeTree<String, ValuePair> tree)
 	{		
 		int printedValues = 0;
@@ -117,6 +132,10 @@ public class Driver {
 		}
 	}
 	
+	/**
+	 * Test function for adding a to z.
+	 * @param tree The tree to add to.
+	 */
 	private static void addAZ(TwoThreeTree<String, ValuePair> tree)
 	{
 		tree.put("a", new ValuePair(1, 20));
@@ -147,6 +166,10 @@ public class Driver {
 		tree.put("z", new ValuePair(26, 7987));
 	}
 
+	/**
+	 * Test function for adding z to a.
+	 * @param tree The tree to add to.
+	 */
 	private static void addZA(TwoThreeTree<String, ValuePair> tree){
 //		tree.put("z", new ValuePair<Integer, Integer>(33, 7987));
 //		tree.put("y", new ValuePair<Integer, Integer>(30, 7987));
@@ -176,7 +199,11 @@ public class Driver {
 //		tree.put("a", new ValuePair<Integer, Integer>(33, 7987));
 	}
 	
-	private static void printAZ (){
+	/**
+	 * Test function for printing a to z.
+	 * @param tree The tree where the values are stored.
+	 */
+	private static void printAZ (TwoThreeTree<String, ValuePair> tree){
 //		System.out.print(tree.get("a").x + ", ");
 //		System.out.print(tree.get("b").x + ", ");
 //		System.out.print(tree.get("c").x + ", ");
