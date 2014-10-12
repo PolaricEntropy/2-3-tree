@@ -3,25 +3,25 @@ package se.kth.id1020.lab4;
 import edu.princeton.cs.introcs.In;
 
 import java.net.URL;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class Driver {
 
 	public static void main(String[] args) {
 		TwoThreeTree<String, ValuePair> tree = new TwoThreeTree<String, ValuePair>();
 		
-		addAZ(tree);
+		//addAZ(tree);
 		//addZA(tree);
-		//addText(tree);
+		addText(tree);
 		//getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
-		//swapTree(tree); //Create a new tree so keys are the x,y valuePair and the value is the word.
+		swapTree(tree); //Create a new tree so keys are the x,y valuePair and the value is the word.
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
 		System.out.println("Density: " + tree.density());
-		System.out.println("Minimum number of elements we can add before depth changes: " + tree.howMuchMoreMin());
-		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMoreMax());
-		
+		//System.out.println("Minimum number of elements we can add before depth changes: " + tree.howMuchMoreMin());
+		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMoreMax());	
 	}
 
 	private static String CleanWord(String in)
@@ -76,14 +76,19 @@ public class Driver {
 	private static void swapTree(TwoThreeTree<String, ValuePair> tree)
 	{
 		TwoThreeTree<ValuePair, String> swappedTree = new TwoThreeTree<ValuePair, String>();
+		int printedValues = 0;
 		
 		//Iterate through the first tree, adding all key/values from that one to our second swapped tree.
 		for (KeyValuePair<String, ValuePair> keyValues : tree.keys())
 			swappedTree.put(keyValues.value, keyValues.key);
 		
-		int printedValues = 0;
+		//Get all the keys in our swapped tree
+		LinkedList<KeyValuePair<ValuePair, String>> keyValuesinTree = (LinkedList<KeyValuePair<ValuePair, String>>)swappedTree.keys();
 		
-		for (KeyValuePair<ValuePair, String> keyValues : swappedTree.keys())
+		//Sort by occurrence count. 
+		Collections.sort(keyValuesinTree, new compareByOccuranceCount2());
+		
+		for (KeyValuePair<ValuePair, String> keyValues : keyValuesinTree)
 		{
 			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.value, keyValues.key.occuranceCount));
 			printedValues++;
@@ -98,7 +103,12 @@ public class Driver {
 	{		
 		int printedValues = 0;
 		
-		for (KeyValuePair<String, ValuePair> keyValues : tree.keys())
+		LinkedList<KeyValuePair<String, ValuePair>> keyValuesinTree = (LinkedList<KeyValuePair<String, ValuePair>>)tree.keys();
+		
+		//Sort by occurrence count. 
+		Collections.sort(keyValuesinTree, new compareByOccuranceCount());
+		
+		for (KeyValuePair<String, ValuePair> keyValues : keyValuesinTree)
 		{
 			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.key, keyValues.value.occuranceCount));
 			printedValues++;
@@ -106,7 +116,6 @@ public class Driver {
 			if (printedValues == 10)
 				break;
 		}
-			
 	}
 	
 	private static void addAZ(TwoThreeTree<String, ValuePair> tree)
@@ -126,17 +135,17 @@ public class Driver {
 		tree.put("m", new ValuePair(13, 7987));
 		tree.put("n", new ValuePair(14, 7987));
 		tree.put("o", new ValuePair(15, 7987));
-//		tree.put("p", new ValuePair(16, 7987));
-//		tree.put("q", new ValuePair(17, 7987));
-//		tree.put("r", new ValuePair(18, 7987));
-//		tree.put("s", new ValuePair(19, 7987));
-//		tree.put("t", new ValuePair(20, 7987));
-//		tree.put("u", new ValuePair(21, 7987));
-//		tree.put("v", new ValuePair(22, 7987));
-//		tree.put("w", new ValuePair(23, 7987));
-//		tree.put("x", new ValuePair(24, 7987));
-//		tree.put("y", new ValuePair(25, 7987));
-//		tree.put("z", new ValuePair(26, 7987));
+		tree.put("p", new ValuePair(16, 7987));
+		tree.put("q", new ValuePair(17, 7987));
+		tree.put("r", new ValuePair(18, 7987));
+		tree.put("s", new ValuePair(19, 7987));
+		tree.put("t", new ValuePair(20, 7987));
+		tree.put("u", new ValuePair(21, 7987));
+		tree.put("v", new ValuePair(22, 7987));
+		tree.put("w", new ValuePair(23, 7987));
+		tree.put("x", new ValuePair(24, 7987));
+		tree.put("y", new ValuePair(25, 7987));
+		tree.put("z", new ValuePair(26, 7987));
 	}
 
 //	private static void addZA(TwoThreeTree<String, ValuePair<Integer, Integer>> tree){

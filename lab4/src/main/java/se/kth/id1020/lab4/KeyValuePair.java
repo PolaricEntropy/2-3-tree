@@ -13,4 +13,13 @@ public class KeyValuePair<K extends Comparable<K>, V> {
 		this.value = value;
 	}
 	
+	public boolean equals(Object o)
+	{
+		//Assume we are comparing to another KeyValuePair with the same K, V.
+		KeyValuePair<K, V> obj = (KeyValuePair<K, V>) o;
+		
+		//KeyValuePairs are equal if keys are equal.
+		return this.key.equals(obj.key);
+	}
+	
 }
