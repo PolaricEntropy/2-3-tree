@@ -10,27 +10,27 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 	
 	public class Node
 	{
-		protected KeyValuePair<K, V> keyvalues1;
-		protected KeyValuePair<K, V> keyvalues2;
+		protected KeyValuePair keyvalues1;
+		protected KeyValuePair keyvalues2;
 		protected Node parent, left, middle, right;
 		
-		public Node(KeyValuePair<K, V> keyValues1)
+		public Node(KeyValuePair keyValues1)
 		{
 			this.keyvalues1 = keyValues1;
 		}
 		
-		public Node(KeyValuePair<K, V> keyValues1, KeyValuePair<K, V> keyValues2)
+		public Node(KeyValuePair keyValues1, KeyValuePair keyValues2)
 		{
-			this(keyValues1);
+			this.keyvalues1 = keyValues1;
 			this.keyvalues2 = keyValues2;
 		} 
 	}
 	public class FourNode extends Node
 	{
-		protected KeyValuePair<K, V> keyvalues3;
+		protected KeyValuePair keyvalues3;
 		protected Node middle2;
 		
-		public FourNode (KeyValuePair<K, V> keyValues1, KeyValuePair<K, V> keyValues2, KeyValuePair<K, V> keyValues3)
+		public FourNode (KeyValuePair keyValues1, KeyValuePair keyValues2, KeyValuePair keyValues3)
 		{
 			super(keyValues1, keyValues2);
 			this.keyvalues3 = keyValues3;
@@ -77,7 +77,7 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		//Create a TwoNode and store our key/value in it, done.
 		if (root == null)
 		{
-			root = new Node(new KeyValuePair<K, V>(key, value));
+			root = new Node(new KeyValuePair(key, value));
 			splitCount = 1; //We need to add 1 to our size variable, we have not done a split, but we have one node now.
 			return;
 		}
@@ -93,12 +93,12 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 			{
 				//We need to move stuff if we are inserting to the left.
 				foundNode.keyvalues2 = foundNode.keyvalues1;
-				foundNode.keyvalues1 = new KeyValuePair<K, V>(key, value);
+				foundNode.keyvalues1 = new KeyValuePair(key, value);
 			}
 			else if (key.equals(foundNode.keyvalues1.key)) 			//Equal to key in node, replace value.
 				foundNode.keyvalues1.value = value;
 			else if (key.compareTo(foundNode.keyvalues1.key) > 0) 	//Key is greater than key in node.
-				foundNode.keyvalues2 = new KeyValuePair<K, V>(key, value);
+				foundNode.keyvalues2 = new KeyValuePair(key, value);
 			
 		}
 		else //If the node is a ThreeNode, then it's more complicated. Create a temporary FourNode, split it to a TwoNode and merge that back into the tree.
@@ -120,18 +120,18 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 			
 			//Key is less than left key, insert new value to the left. 
 			if (key.compareTo(foundNode.keyvalues1.key) <= -1)
-				tempFourNode = new FourNode(new KeyValuePair<K, V>(key, value), foundNode.keyvalues1, foundNode.keyvalues2);
+				tempFourNode = new FourNode(new KeyValuePair(key, value), foundNode.keyvalues1, foundNode.keyvalues2);
 			
 			//Key is larger then the left key, and smaller then the right key, thus it should go in the middle.
 			else if (key.compareTo(foundNode.keyvalues1.key) >= 1 && key.compareTo(foundNode.keyvalues2.key) <= -1)
-				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair<K, V>(key, value), foundNode.keyvalues2);
+				tempFourNode = new FourNode(foundNode.keyvalues1, new KeyValuePair(key, value), foundNode.keyvalues2);
 			
 			//Key is more then the right key, insert new value in the right.
 			else if (key.compareTo(foundNode.keyvalues2.key) >= 1)
-				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair<K, V>(key, value));
+				tempFourNode = new FourNode(foundNode.keyvalues1, foundNode.keyvalues2, new KeyValuePair(key, value));
 			
 			//Insert this FourNode into the tree.
-			put4NodeInNode(foundNode, tempFourNode);
+			put4NodeInTree(foundNode, tempFourNode);
 		}
 	}
 
@@ -144,9 +144,14 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		return splitCount;
 	}
 	
-	public Iterable<KeyValuePair<K, V>> keys()
+	/**
+	 * Returns an iterable collection of all key/values in our tree.
+	 * @return A LinkedList with the elements sorted by key order.
+	 */
+	public Iterable<KeyValuePair> keys()
 	{
-		LinkedList<KeyValuePair<K, V>> results = new LinkedList<KeyValuePair<K, V>>();
+		//List to store the result in.
+		LinkedList<KeyValuePair> results = new LinkedList<KeyValuePair>();
 		
 		//Traverse the tree in-order and add each keyValue to the LinkedList. 
 		traverseTree(root, results);
@@ -154,17 +159,26 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		return results;
 	}
 	
-	public Iterable<KeyValuePair<K, V>> keys(K lo, K hi)
+	/**
+	 * Returns an iterable collection of all key/values in our tree.
+	 * @param lo The lowest key value that should occur in our collection.
+	 * @param hi The highest key value that should occur in our collection.
+	 * @return A LinkedList with the elements sorted by key order within the bounds of lo =< keys =< hi.
+	 */
+	public Iterable<KeyValuePair> keys(K lo, K hi)
 	{
-		List<KeyValuePair<K, V>> result = (LinkedList<KeyValuePair<K, V>>)keys();
-		List<KeyValuePair<K, V>> result2 = new LinkedList<KeyValuePair<K, V>>();
+		List<KeyValuePair> treeKeyValues = (LinkedList<KeyValuePair>)keys();
+		List<KeyValuePair> result = new LinkedList<KeyValuePair>();
 		
-		int indexOfLow = indexOfKeyInList(lo, result);
-		int indexOfHigh = indexOfKeyInList(hi, result)+1;
+		int indexOfLow = indexOfKeyInList(lo, treeKeyValues);
+		int indexOfHigh = indexOfKeyInList(hi, treeKeyValues)+1;
 		
-		result2.addAll(result.subList(indexOfLow, indexOfHigh));
+		if (indexOfLow == -1 || indexOfHigh == -1)
+			throw new IllegalArgumentException("Key lo and/or hi not found in the tree.");
 		
-		return result2;
+		result.addAll(treeKeyValues.subList(indexOfLow, indexOfHigh));
+		
+		return result;
 	}
 	
 	/**
@@ -215,19 +229,7 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		
 		return result.intValue();
 	}
-	
-//	public int howMuchMoreMin()
-//	{
-//		//TODO: Find number of threeNodes in the branch with the most threeNodes.
-//		int numThreeNodesInBranchWithMostThreeNodes = 0;
-//		
-//		//If you only increase one branch of the tree you will need two elements to convert the parent to a ThreeNode,
-//		//hence it takes 2^2 to convert their parent and then 2^3 to convert the grandparent and so on. That results in 2^(depth+1).
-//		Double result = Math.pow(2, depth()+1) - numThreeNodesInBranchWithMostThreeNodes; 
-//		
-//		return result.intValue();
-//	}
-	
+
 	/**
 	 * Returns the average value of two and threeNodes in our tree.
 	 * @return The value as a float.
@@ -331,36 +333,47 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		}	
 	}
 	
-	private void put4NodeInNode(Node currentNode, FourNode tmpFourNode)
+	/**
+	 * Inserts a FourNode into the tree. If we try to merge with a three node we recursively try to go up the three until we can insert. 
+	 * @param currentNode The node the value should be in.
+	 * @param tmpFourNode The FourNode we are trying to insert.
+	 */
+	private void put4NodeInTree(Node currentNode, FourNode tmpFourNode)
 	{
-	
 		//Split the FourNode into a TwoNode.	
 		Node splitResult = Convert4to2(tmpFourNode);
 		splitCount++;
 		
+		//If we've worked our way up to the root, then we don't need to merge, just set the root to the split result.
 		if (currentNode == root)
 		{
 			root = splitResult;
 			splitCount++;
+			//Normally splitting produces two new children, and then merging will reduce that by one.
+			//Since we are not merging now we need to count the split above one more time.  
 		}
 		else
 		{
 			Node parent = currentNode.parent;
 		
-			//Merge with the parent.
+			//Merge the splitResult with the parent.
 			FourNode mergeResult = MergeNodes (parent, splitResult);
 			
-			//If the merge result is null parent was a TwoNode, and we are done.
-			// If not, we need to merge the new FourNode we have with the parent and repeat.
+			//If the merge result is null the parent was a TwoNode, and we are done. It's inserted.
+			//If not, we need to merge the new FourNode we have with the parent and repeat.
 			if (mergeResult != null)
-				put4NodeInNode(parent, mergeResult);	
+				put4NodeInTree(parent, mergeResult);
 		}		
 	}
 	
+	/**
+	 * Splits a FourNode into a TwoNode.
+	 * @param inNode The FourNode to split.
+	 * @return Returns the root of the new TwoNode.
+	 */
 	private Node Convert4to2(FourNode inNode)
 	{
-	
-		// Convert a 4 node that looks like this:
+		// Convert a FourNode that looks like this:
 		//		
 		//		(a, b, c)
 		//		/  |  |	 \
@@ -375,47 +388,54 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		//     /	 \ /     \
 		//    1      2 3     4
 		
-		//Create a new root node, b, from the middle keyValue. 
+		//Create a new local root node, b, from the middle keyValue. 
 		Node newRoot = new Node (inNode.keyvalues2);
 		
 		//New left, a, is the left child. New right, c, is the right child.
 		Node newLeft = new Node (inNode.keyvalues1);
 		Node newRight = new Node (inNode.keyvalues3);
+	
+		//Set the new children to the NewRoot.
+		newRoot.left = newLeft;
+		newRoot.middle = newRight;
 		
-		//Get the two left most children to the newLeft node.
+		//Link these to the root node.
 		newLeft.parent = newRoot;
+		newRight.parent = newRoot;
 		
+		//Move branch 1, and relink its parent if we have such a branch.
 		newLeft.left = inNode.left;
 		
 		if (newLeft.left != null)
 			newLeft.left.parent = newLeft;
 		
+		//Move branch 2, and relink its parent if we have such a branch.
 		newLeft.middle = inNode.middle;
 		
 		if (newLeft.middle != null)
 			newLeft.middle.parent = newLeft;
-		
-		//Get the two right most children to the newRight node.
-		newRight.parent = newRoot;
-		
+			
+		//Move branch 3, and relink its parent if we have such a branch.
 		newRight.left = inNode.middle2;
 		
 		if (newRight.left != null)
 			newRight.left.parent = newRight;
 		
+		//Move branch 4, and relink its parent if we have such a branch.
 		newRight.middle = inNode.right;
 		
 		if(newRight.middle != null)
 			newRight.middle.parent = newRight;
 		
-		//Set the new children to the NewRoot.
-		newRoot.left = newLeft;
-		newRoot.middle = newRight;
-		
 		return newRoot;
 	}
 
-	private void traverseTree (Node curNode, List<KeyValuePair<K, V>> treeItems)
+	/**
+	 * Traverses the tree in-order and adds the KeyValues to a List.
+	 * @param curNode The current node we should traverse/add.
+	 * @param treeItems List to add KeyValues to.
+	 */
+	private void traverseTree (Node curNode, List<KeyValuePair> treeItems)
 	{
 		//If leaf node.
 		if (curNode.left == null)
@@ -429,29 +449,32 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		}
 		else if (curNode.keyvalues2 == null) //If TwoNode.
 		{
-			traverseTree(curNode.left, treeItems);
-			
-			treeItems.add(curNode.keyvalues1);
-			
-			traverseTree(curNode.middle, treeItems);
+			traverseTree(curNode.left, treeItems); //Add lesser values first.
+			treeItems.add(curNode.keyvalues1); //Then this value.
+			traverseTree(curNode.middle, treeItems); //And greater values.
 		}
 		else //If ThreeNode.
 		{
-			traverseTree(curNode.left, treeItems);
-			
-			treeItems.add(curNode.keyvalues1);
-			
-			traverseTree(curNode.middle, treeItems);
-			
-			treeItems.add(curNode.keyvalues2);
-			
-			traverseTree(curNode.right, treeItems);
+			traverseTree(curNode.left, treeItems); //Lesser values.
+			treeItems.add(curNode.keyvalues1); //Low value.
+			traverseTree(curNode.middle, treeItems); //Middle values.
+			treeItems.add(curNode.keyvalues2); //High value.
+			traverseTree(curNode.right, treeItems); //Higher values.
 		}
 	}
 	
+	/**
+	 * Merges the specified node with the specified tree node.
+	 * @param treeNode The node in the tree we are going to merge with.
+	 * @param separateNode TwoNode to merge into the tree.
+	 * @return If merged with a ThreeNode we get a resultant FourNode as a result that needs to be merged again.
+	 */
 	private FourNode MergeNodes(Node treeNode, Node separateNode)
 	{		
 		//The separate node we are sending in is assumed to be a TwoNode.
+		
+		//Possible merge result.
+		FourNode newFourNode = null;
 		
 		//If the node in the tree we are merging with is a TwoNode.
 		if (treeNode.keyvalues2 == null)
@@ -478,67 +501,91 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 				treeNode.middle = separateNode.left;
 			}
 			
-			//Don't forget to relink the parent property.
+			//Don't forget to relink the parent property after we've moved children around.
 			separateNode.middle.parent = treeNode;
-			separateNode.left.parent = treeNode;
-									
-			return null;
+			separateNode.left.parent = treeNode;						
 		}
-		else //If the node in the tree we are merging with is a three node.
+		else //If the node in the tree we are merging with is a ThreeNode.
 		{
-			FourNode tmpFourNode;
-			
 			//If the key in the separate node is smaller than the three node's first key.
 			if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) <= -1)
 			{
+				newFourNode = new FourNode(separateNode.keyvalues1, treeNode.keyvalues1, treeNode.keyvalues2);
 				
-				tmpFourNode = new FourNode(separateNode.keyvalues1, treeNode.keyvalues1, treeNode.keyvalues2);
-				
-				tmpFourNode.left = separateNode.left;
-				tmpFourNode.middle = separateNode.middle;
-				tmpFourNode.middle2 = treeNode.middle;
-				tmpFourNode.right = treeNode.right;
+				newFourNode.left = separateNode.left;
+				newFourNode.middle = separateNode.middle;
+				newFourNode.middle2 = treeNode.middle;
+				newFourNode.right = treeNode.right;
 			}
-			else if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) >= 1 && separateNode.keyvalues1.key.compareTo(treeNode.keyvalues2.key) <= -1)
+			else if (separateNode.keyvalues1.key.compareTo(treeNode.keyvalues1.key) > 0 && separateNode.keyvalues1.key.compareTo(treeNode.keyvalues2.key) < 0)
 			{
-				tmpFourNode = new FourNode(treeNode.keyvalues1, separateNode.keyvalues1, treeNode.keyvalues2);
+				newFourNode = new FourNode(treeNode.keyvalues1, separateNode.keyvalues1, treeNode.keyvalues2);
 				
-				tmpFourNode.left = treeNode.left;
-				tmpFourNode.middle = separateNode.left;
-				tmpFourNode.middle2 = separateNode.middle;
-				tmpFourNode.right = treeNode.right;
+				newFourNode.left = treeNode.left;
+				newFourNode.middle = separateNode.left;
+				newFourNode.middle2 = separateNode.middle;
+				newFourNode.right = treeNode.right;
 			}
 			else //If not smaller or in the middle of our values it must be bigger.
 			{
-				tmpFourNode = new FourNode(treeNode.keyvalues1, treeNode.keyvalues2, separateNode.keyvalues1);
+				newFourNode = new FourNode(treeNode.keyvalues1, treeNode.keyvalues2, separateNode.keyvalues1);
 				
-				tmpFourNode.left = treeNode.left;
-				tmpFourNode.middle = treeNode.middle;
-				tmpFourNode.middle2 = separateNode.left;
-				tmpFourNode.right = separateNode.middle;
+				newFourNode.left = treeNode.left;
+				newFourNode.middle = treeNode.middle;
+				newFourNode.middle2 = separateNode.left;
+				newFourNode.right = separateNode.middle;
 			}
 			
 			//Relink the children to our FourNode.
-			tmpFourNode.left.parent = tmpFourNode;
-			tmpFourNode.middle.parent = tmpFourNode;
-			tmpFourNode.middle2.parent = tmpFourNode;
-			tmpFourNode.right.parent = tmpFourNode;			
-			
-			return tmpFourNode;
+			newFourNode.left.parent = newFourNode;
+			newFourNode.middle.parent = newFourNode;
+			newFourNode.middle2.parent = newFourNode;
+			newFourNode.right.parent = newFourNode;			
 		}
 		
+		//If no new FourNode then this will be null. 
+		return newFourNode;
 	}
 
-	private int indexOfKeyInList(K key, List<KeyValuePair<K, V>> listToSearch)
+	/**
+	 * Searches a list for the specified key.
+	 * @param key The key to search for.
+	 * @param listToSearch The list of KeyValues to search for.
+	 * @return The index to the first (and only) occurrence of the key in the list.
+	 */
+	private int indexOfKeyInList(K key, List<KeyValuePair> listToSearch)
 	{
 		for (int i = 0; i < listToSearch.size(); i++)
 		{
-			KeyValuePair<K, V> element = listToSearch.get(i);
+			KeyValuePair element = listToSearch.get(i);
 
-			if (element !=null && element.equals(new KeyValuePair<K, V> (key, null)))
+			if (element !=null && element.equals(new KeyValuePair (key, null)))
 				return i;
 		}
 		return -1; //Not in the list.
 	} 
+	
+	public class KeyValuePair {
+
+		public K key;
+		public V value;
+		
+		public KeyValuePair(K key, V value)
+		{
+			this.key = key;
+			this.value = value;
+		}
+		
+		public boolean equals(Object o)
+		{
+			//Assume we are comparing to another KeyValuePair with the same K, V.
+			KeyValuePair obj = (KeyValuePair) o;
+			
+			//KeyValuePairs are equal if keys are equal.
+			return this.key.equals(obj.key);
+		}
+		
+	}
+
 	
 }

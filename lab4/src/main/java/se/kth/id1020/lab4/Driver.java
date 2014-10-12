@@ -14,19 +14,18 @@ public class Driver {
 		//addAZ(tree);
 		//addZA(tree);
 		addText(tree);
-		//getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
+		getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
 		swapTree(tree); //Create a new tree so keys are the x,y valuePair and the value is the word.
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
 		System.out.println("Density: " + tree.density());
-		//System.out.println("Minimum number of elements we can add before depth changes: " + tree.howMuchMoreMin());
 		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMoreMax());	
 	}
 
+	
 	private static String CleanWord(String in)
 	{
-		
 		//Remove .,:;". 
 		in = in.replaceAll("([().,:;\"]+)", "");
         
@@ -79,16 +78,16 @@ public class Driver {
 		int printedValues = 0;
 		
 		//Iterate through the first tree, adding all key/values from that one to our second swapped tree.
-		for (KeyValuePair<String, ValuePair> keyValues : tree.keys())
+		for (TwoThreeTree<String, ValuePair>.KeyValuePair keyValues : tree.keys())
 			swappedTree.put(keyValues.value, keyValues.key);
 		
 		//Get all the keys in our swapped tree
-		LinkedList<KeyValuePair<ValuePair, String>> keyValuesinTree = (LinkedList<KeyValuePair<ValuePair, String>>)swappedTree.keys();
+		LinkedList<TwoThreeTree<ValuePair, String>.KeyValuePair> keyValuesinTree = (LinkedList<TwoThreeTree<ValuePair, String>.KeyValuePair>)swappedTree.keys();
 		
 		//Sort by occurrence count. 
 		Collections.sort(keyValuesinTree, new compareByOccuranceCount2());
 		
-		for (KeyValuePair<ValuePair, String> keyValues : keyValuesinTree)
+		for (TwoThreeTree<ValuePair, String>.KeyValuePair keyValues : keyValuesinTree)
 		{
 			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.value, keyValues.key.occuranceCount));
 			printedValues++;
@@ -103,12 +102,12 @@ public class Driver {
 	{		
 		int printedValues = 0;
 		
-		LinkedList<KeyValuePair<String, ValuePair>> keyValuesinTree = (LinkedList<KeyValuePair<String, ValuePair>>)tree.keys();
+		LinkedList<TwoThreeTree<String, ValuePair>.KeyValuePair> keyValuesinTree = (LinkedList<TwoThreeTree<String, ValuePair>.KeyValuePair>)tree.keys();
 		
 		//Sort by occurrence count. 
 		Collections.sort(keyValuesinTree, new compareByOccuranceCount());
 		
-		for (KeyValuePair<String, ValuePair> keyValues : keyValuesinTree)
+		for (TwoThreeTree<String, ValuePair>.KeyValuePair keyValues : keyValuesinTree)
 		{
 			System.out.println(String.format("Word: %s 		Occurance count: %s", keyValues.key, keyValues.value.occuranceCount));
 			printedValues++;
@@ -148,7 +147,7 @@ public class Driver {
 		tree.put("z", new ValuePair(26, 7987));
 	}
 
-//	private static void addZA(TwoThreeTree<String, ValuePair<Integer, Integer>> tree){
+	private static void addZA(TwoThreeTree<String, ValuePair> tree){
 //		tree.put("z", new ValuePair<Integer, Integer>(33, 7987));
 //		tree.put("y", new ValuePair<Integer, Integer>(30, 7987));
 //		tree.put("x", new ValuePair<Integer, Integer>(31, 7987));
@@ -175,7 +174,7 @@ public class Driver {
 //		tree.put("c", new ValuePair<Integer, Integer>(31, 7987));
 //		tree.put("b", new ValuePair<Integer, Integer>(32, 7987));
 //		tree.put("a", new ValuePair<Integer, Integer>(33, 7987));
-//	}
+	}
 	
 	private static void printAZ (){
 //		System.out.print(tree.get("a").x + ", ");
