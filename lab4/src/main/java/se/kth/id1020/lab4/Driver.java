@@ -11,9 +11,10 @@ public class Driver {
 	public static void main(String[] args) {
 		TwoThreeTree<String, ValuePair> tree = new TwoThreeTree<String, ValuePair>();
 		
-		addText(tree);
+		addAZ(tree);
+		//addText(tree);
 		getMostOccuringWordsWithIterator(tree); //Get the most occurring words, for task 4.
-		swapTree(tree); //Create a new tree so keys are the valuePair and the value is the word.
+		//swapTree(tree); //Create a new tree so keys are the valuePair and the value is the word.
 		
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
@@ -145,25 +146,25 @@ public class Driver {
 		tree.put("e", new ValuePair(5, 298));
 		tree.put("f", new ValuePair(6, 7987));
 		tree.put("g", new ValuePair(7, 7987));
-		tree.put("h", new ValuePair(8, 7987));
-		tree.put("i", new ValuePair(9, 7987));
-		tree.put("j", new ValuePair(10, 7987));
-		tree.put("k", new ValuePair(11, 7987));
-		tree.put("l", new ValuePair(12, 7987));
-		tree.put("m", new ValuePair(13, 7987));
-		tree.put("n", new ValuePair(14, 7987));
-		tree.put("o", new ValuePair(15, 7987));
-		tree.put("p", new ValuePair(16, 7987));
-		tree.put("q", new ValuePair(17, 7987));
-		tree.put("r", new ValuePair(18, 7987));
-		tree.put("s", new ValuePair(19, 7987));
-		tree.put("t", new ValuePair(20, 7987));
-		tree.put("u", new ValuePair(21, 7987));
-		tree.put("v", new ValuePair(22, 7987));
-		tree.put("w", new ValuePair(23, 7987));
-		tree.put("x", new ValuePair(24, 7987));
-		tree.put("y", new ValuePair(25, 7987));
-		tree.put("z", new ValuePair(26, 7987));
+//		tree.put("h", new ValuePair(8, 7987));
+//		tree.put("i", new ValuePair(9, 7987));
+//		tree.put("j", new ValuePair(10, 7987));
+//		tree.put("k", new ValuePair(11, 7987));
+//		tree.put("l", new ValuePair(12, 7987));
+//		tree.put("m", new ValuePair(13, 7987));
+//		tree.put("n", new ValuePair(14, 7987));
+//		tree.put("o", new ValuePair(15, 7987));
+//		tree.put("p", new ValuePair(16, 7987));
+//		tree.put("q", new ValuePair(17, 7987));
+//		tree.put("r", new ValuePair(18, 7987));
+//		tree.put("s", new ValuePair(19, 7987));
+//		tree.put("t", new ValuePair(20, 7987));
+//		tree.put("u", new ValuePair(21, 7987));
+//		tree.put("v", new ValuePair(22, 7987));
+//		tree.put("w", new ValuePair(23, 7987));
+//		tree.put("x", new ValuePair(24, 7987));
+//		tree.put("y", new ValuePair(25, 7987));
+//		tree.put("z", new ValuePair(26, 7987));
 	}
 
 	/**

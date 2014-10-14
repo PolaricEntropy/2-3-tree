@@ -214,18 +214,16 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		
 		//Get the depth once.
 		int depth = depth();
-		int numElementsAfterDepthChange = 0;
+		double numElementsInFullTree = 0;
 		
-		//The minimum number of elements after the depth change to our current depth.
-		//2^(depth) + 2^(depth -1) + 2^(depth -2) + ...
+		//This is how many elements a full tree of our depth have.
+		//2 * 3^(depth) + 2 * 3^(depth -1) + 2 *3^(depth -2) + ...
 		//Geometric sum.
 		for (int n = depth; n >= 0; n--)
-			numElementsAfterDepthChange += Math.pow(2, (depth - n));
+			numElementsInFullTree += 2 * Math.pow(3, (depth - n));
 		
-		//2*3^depth is the maximum of elements in the tree, if all nodes are ThreeNodes.
-		//The second term is the minimum number of elements (when all nodes are TwoNodes) after a depth change.
-		//Subtract the number of elements in the tree.
-		Double result = 2 * Math.pow(3, depth) + numElementsAfterDepthChange - (2 * totalRes[1] + totalRes[0]); 
+		//Take the full tree - how much we actually have, and the difference is how many we can add.
+		Double result = numElementsInFullTree - (2 * totalRes[1] + totalRes[0]);
 		
 		return result.intValue();
 	}
