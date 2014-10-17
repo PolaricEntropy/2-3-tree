@@ -5,8 +5,11 @@ import java.util.List;
 
 public class TwoThreeTree <K extends Comparable<K>, V> {
 
+	//TODO: Rewrite comparator for key, stuff should be sorted by occurrence count with the occurrence number to separate two keys. Word is still the key since count needs to be updated.
+	//Also, need to write a iterator to get one element at the time. And for density and other functions it would be neat if we had the num of elements stored in a global var, so we don't need to traverse the tree each time to find it.
+	
 	private Node root;
-	private int splitCount = 0; //We are only creating new nodes when splitting (with a few exceptions). Just count the splits and we get the size.
+	private int nodeCount = 0; //We are only creating new nodes when splitting (with a few exceptions). Just count the splits and we get the size.
 	
 	public class Node
 	{
@@ -78,7 +81,7 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		if (root == null)
 		{
 			root = new Node(new KeyValuePair(key, value));
-			splitCount = 1; //We need to add 1 to our size variable, we have not done a split, but we have one node now.
+			nodeCount = 1; //We need to add 1 to our size variable, we have not done a split, but we have one node now.
 			return;
 		}
 		
@@ -141,7 +144,7 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 	 */
 	public int size()
 	{
-		return splitCount;
+		return nodeCount;
 	}
 	
 	/**
@@ -207,7 +210,7 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 	 * Returns the maximum number of elements we can add to the tree before our depth changes.
 	 * @return Returns the remaining elements we can add before our tree grows in depth.
 	 */
-	public int howMuchMoreMax()
+	public int howMuchMore()
 	{
 		//Get the number of different nodes for root. Number of TwoNodes is in index 0, ThreeNodes is index 1.
 		int[] totalRes = CountNodeTypes(root);
@@ -304,6 +307,10 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 				return startNode;
 		}
 		
+		//If equal to our first value, this is the same for both TwoNodes and ThreeNodes.
+		if (key.equals(startNode.keyvalues1.key))
+			return startNode;
+		
 		//If smaller than the first value search left, this is the same for both TwoNodes and ThreeNodes. 
 		if (key.compareTo(startNode.keyvalues1.key) < 0)
 			return getNode(key, startNode.left, returnNullOnMissing);
@@ -311,16 +318,13 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 		//TwoNode.
 		if (startNode.keyvalues2 == null)
 		{
-			//If equal to our value.
-			if (key.equals(startNode.keyvalues1.key))
-				return startNode;
-			else //Must be greater than, search middle cause that's the right child in two nodes.
-				return getNode(key, startNode.middle, returnNullOnMissing); //Middle is right child for TwoNodes.
+			//Must be greater than, search middle cause that's the right child in two nodes.
+			return getNode(key, startNode.middle, returnNullOnMissing); //Middle is right child for TwoNodes.
 		}
 		else //ThreeNode
 		{
-			//If equal to our first or second value.
-			if (key.equals(startNode.keyvalues1.key) || key.equals(startNode.keyvalues2.key))
+			//If equal to our second value.
+			if (key.equals(startNode.keyvalues2.key))
 				return startNode;
 			
 			//If in the middle, search middle child.
@@ -340,13 +344,13 @@ public class TwoThreeTree <K extends Comparable<K>, V> {
 	{
 		//Split the FourNode into a TwoNode.	
 		Node splitResult = Convert4to2(tmpFourNode);
-		splitCount++;
+		nodeCount++;
 		
 		//If we've worked our way up to the root, then we don't need to merge, just set the root to the split result.
 		if (currentNode == root)
 		{
 			root = splitResult;
-			splitCount++;
+			nodeCount++;
 			//Normally splitting produces two new children, and then merging will reduce that by one.
 			//Since we are not merging now we need to count the split above one more time.  
 		}

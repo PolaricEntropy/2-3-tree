@@ -19,7 +19,7 @@ public class Driver {
 		System.out.println("Size: "+ tree.size());
 		System.out.println("Depth: " + tree.depth());
 		System.out.println("Density: " + tree.density());
-		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMoreMax());	
+		System.out.println("Maximum number of elements we can add before depth changes: " + tree.howMuchMore());	
 	}
 
 	/**
